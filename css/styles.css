@@ -811,6 +811,56 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   .mapa-3d-perspectiva { max-width: 220px; }
 }
 
+/* ── Panel info municipio hover ── */
+.mapa-info-panel {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 12px;
+  margin-top: 10px; margin-bottom: 4px; min-height: 38px;
+  transition: border-color .2s;
+}
+.mapa-info-panel:has(#mapa-info-mun:not(:empty)) { border-color: var(--green-dark); }
+.mapa-info-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green-pri); flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(102,204,51,.5);
+}
+.mapa-info-name { font-size: 12px; font-weight: 700; color: var(--green-pri); }
+.mapa-info-sub  { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ── Tabla datos DANE ── */
+.mapa-datos-details {
+  margin: 6px 0 10px; border: 1px solid var(--border);
+  border-radius: var(--r-sm); overflow: hidden;
+}
+.mapa-datos-details summary {
+  padding: 7px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text2); cursor: pointer; user-select: none;
+  background: var(--surface2); list-style: none;
+}
+.mapa-datos-details summary::-webkit-details-marker { display: none; }
+.mapa-datos-details summary::before {
+  content: '▶ '; font-size: 9px; margin-right: 4px; color: var(--green-pri);
+  transition: transform .2s; display: inline-block;
+}
+.mapa-datos-details[open] summary::before { content: '▼ '; }
+.mapa-datos-tabla {
+  font-size: 10.5px; border-top: 1px solid var(--border);
+}
+.mdt-row {
+  display: grid; grid-template-columns: 1fr 52px 80px 62px;
+  padding: 5px 12px; border-bottom: 1px solid rgba(255,255,255,.04);
+  cursor: default; transition: background .15s;
+}
+.mdt-row:last-child { border-bottom: none; }
+.mdt-row:not(.mdt-head):not(.mdt-total):hover { background: var(--green-light); cursor: pointer; }
+.mdt-head { background: var(--surface2); font-weight: 700; color: var(--text3); font-size: 10px; text-transform: uppercase; letter-spacing: .4px; }
+.mdt-row span:not(:first-child) { text-align: right; color: var(--text2); }
+.mdt-row span:first-child { color: var(--text); }
+.mdt-capital span:first-child { color: var(--green-pri); font-weight: 700; }
+.mdt-total { background: var(--surface2); font-weight: 700; border-top: 1px solid var(--border) !important; }
+.mdt-total span { color: var(--text) !important; }
+
 /* Marco legal acordeon */
 .marco-item {
   border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; overflow: hidden;

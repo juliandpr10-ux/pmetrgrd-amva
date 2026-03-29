@@ -2,6 +2,37 @@
 let editRef = null;
 const exp = {};
 
+// ── Mapa Valle de Aburrá — datos DANE 2018 ───────────────────────
+const MUN_DATA = {
+  barbosa:    { name: 'Barbosa',     area: 209, pop: 50671 },
+  girardota:  { name: 'Girardota',   area: 81,  pop: 59175 },
+  copacabana: { name: 'Copacabana',  area: 70,  pop: 75546 },
+  bello:      { name: 'Bello',       area: 142, pop: 479484 },
+  medellin:   { name: 'Medellín',    area: 382, pop: 2508452 },
+  envigado:   { name: 'Envigado',    area: 78,  pop: 230296 },
+  itagui:     { name: 'Itagüí',      area: 21,  pop: 271956 },
+  sabaneta:   { name: 'Sabaneta',    area: 15,  pop: 99026 },
+  laestrella: { name: 'La Estrella', area: 35,  pop: 74011 },
+  caldas:     { name: 'Caldas',      area: 196, pop: 80065 }
+};
+function showMunInfo(id) {
+  const d = MUN_DATA[id]; if (!d) return;
+  const dens = Math.round(d.pop / d.area).toLocaleString('es-CO');
+  const nEl = document.getElementById('mapa-info-mun');
+  const dEl = document.getElementById('mapa-info-data');
+  if (nEl) nEl.textContent = d.name;
+  if (dEl) dEl.textContent =
+    d.area.toLocaleString('es-CO') + ' km²  ·  ' +
+    d.pop.toLocaleString('es-CO') + ' hab.  ·  ' +
+    dens + ' hab/km²  ·  Censo DANE 2018';
+}
+function clearMunInfo() {
+  const nEl = document.getElementById('mapa-info-mun');
+  const dEl = document.getElementById('mapa-info-data');
+  if (nEl) nEl.textContent = 'Valle de Aburrá';
+  if (dEl) dEl.textContent = 'Pasa el cursor sobre un municipio';
+}
+
 const LS_KEY = 'pmetrgrd_v2';
 function saveToLocalStorage() {
   try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {}
