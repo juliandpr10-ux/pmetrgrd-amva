@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PMetrGRD — Seguimiento Valle de Aburrá</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head><body>
 
@@ -57,29 +57,32 @@
 
         <!-- Fondo de fotos -->
         <div class="landing-bg">
-          <div class="landing-bg-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80')"></div>
-          <div class="landing-bg-img" style="background-image:url('https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=900&q=80')"></div>
-          <div class="landing-bg-img" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80')"></div>
+          <div class="landing-bg-img" style="background-image:url('assets/portada-valle.jpg')"></div>
+          <div class="landing-bg-img" style="background-image:url('assets/area-metropolitana.jpg')"></div>
+          <div class="landing-bg-img" style="background-image:url('assets/aves-amva.jpg')"></div>
           <div class="landing-bg-overlay"></div>
         </div>
 
         <!-- Logo esquina -->
         <div class="landing-logo-wrap">
-          <img id="landing-logo" src="" alt="AMVA" style="height:52px;object-fit:contain;filter:brightness(0) invert(1);opacity:.92">
+          <img id="landing-logo" src="" alt="AMVA" style="height:44px;object-fit:contain;filter:brightness(0) invert(1);opacity:.9">
           <div class="landing-logo-text">Área Metropolitana<br>del Valle de Aburrá</div>
         </div>
 
+        <!-- Año badge -->
+        <div class="landing-year-badge">2019 — 2031</div>
+
         <!-- Contenido central -->
         <div class="landing-center">
-          <div class="landing-title">Plan Metropolitano de<br>Gestión del Riesgo de Desastres</div>
-          <div class="landing-sub">Valle de Aburrá · 2019–2031</div>
-          <div class="landing-divider"></div>
-          <div class="landing-desc">Selecciona una sección para explorar</div>
+          <div class="landing-eyebrow">Gestión del Riesgo de Desastres</div>
+          <h1 class="landing-title">Plan Metropolitano<br>del Valle de Aburrá</h1>
+          <div class="landing-rule"></div>
+          <p class="landing-sub">Seguimiento de las 242 actividades del plan para los 10 entes territoriales del Valle de Aburrá</p>
 
           <div class="landing-btns">
             <button class="landing-btn landing-btn-primary" onclick="goView('plan')">
               <div class="landing-btn-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="landing-btn-text">
                 <span class="landing-btn-title">El Plan Metropolitano</span>
@@ -90,7 +93,7 @@
 
             <button class="landing-btn landing-btn-secondary" onclick="goView('dashboard')">
               <div class="landing-btn-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
               </div>
               <div class="landing-btn-text">
                 <span class="landing-btn-title">Componente Programático</span>
@@ -98,6 +101,29 @@
               </div>
               <svg class="landing-btn-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+          </div>
+        </div>
+
+        <!-- Stats strip inferior -->
+        <div class="landing-stats-bottom">
+          <div class="landing-stat-item">
+            <div class="landing-stat-n">4</div>
+            <div class="landing-stat-l">Objetivos</div>
+          </div>
+          <div class="landing-stat-sep"></div>
+          <div class="landing-stat-item">
+            <div class="landing-stat-n">242</div>
+            <div class="landing-stat-l">Actividades</div>
+          </div>
+          <div class="landing-stat-sep"></div>
+          <div class="landing-stat-item">
+            <div class="landing-stat-n">10</div>
+            <div class="landing-stat-l">Municipios</div>
+          </div>
+          <div class="landing-stat-sep"></div>
+          <div class="landing-stat-item">
+            <div class="landing-stat-n">3.7M</div>
+            <div class="landing-stat-l">Habitantes</div>
           </div>
         </div>
 
