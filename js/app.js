@@ -245,10 +245,10 @@ function drawDonut(ctx, canvas, segments, progress) {
     startAngle += slice;
   });
 
-  // Center white circle
+  // Center circle — dark to match panel background
   ctx.beginPath();
   ctx.arc(cx, cy, innerR - 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = '#161b22';
   ctx.fill();
 }
 

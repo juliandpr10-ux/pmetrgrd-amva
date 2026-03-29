@@ -59,7 +59,7 @@ const RIESGOS = {
   sismo: {
     icon: '🌍',
     title: 'Sismos',
-    body: `<p style="margin-bottom:10px">Los <strong>sismos</strong> son liberaciones de energía por la fractura o deslizamiento de bloques de la corteza terrestre. El Valle de Aburrá se encuentra en una zona de alta amenaza sísmica intermedia a alta, según la Norma Sismo Resistente NSR-10, lo que implica que sus construcciones deben ser diseñadas para resistir movimientos sísmicos significativos.</p>
+    body: `<p style="margin-bottom:10px">Los <strong>sismos</strong> son liberaciones de energía por la fractura o deslizamiento de bloques de la corteza terrestre. El Valle de Aburrá se encuentra en una zona de amenaza sísmica intermedia, según la Norma Sismo Resistente NSR-10, lo que implica que sus construcciones deben ser diseñadas para resistir movimientos sísmicos de consideración.</p>
     <p style="margin-bottom:10px">El territorio metropolitano presenta condiciones particulares de amplificación sísmica en los depósitos aluviales del fondo del valle, donde los sedimentos blandos pueden aumentar la intensidad del movimiento percibido en superficie. Algunos de estos depósitos arenosos son susceptibles a fenómenos de licuación ante sismos de gran magnitud.</p>
     <p style="background:var(--ok-l);padding:8px 10px;border-radius:6px;font-size:12px;color:var(--ok)">🏗️ El SIATA opera una red de acelerógrafos y sismógrafos que monitorea en tiempo real la actividad sísmica regional, contribuyendo al conocimiento de la amenaza local.</p>`
   },
