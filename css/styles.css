@@ -39,13 +39,8 @@ body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: var(--bg); co
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .topbar-logo-img {
-  width: 40px; height: 40px; flex-shrink: 0;
-  background-image: url('../assets/logo.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: var(--green-dark);
-  background-blend-mode: multiply;
+  height: 40px; width: 40px; object-fit: contain;
+  display: block; flex-shrink: 0;
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-icon {
@@ -612,13 +607,8 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 
 /* ── Landing logo ── */
 .landing-amva-logo {
-  width: 44px; height: 44px; flex-shrink: 0;
-  background-image: url('../assets/logo-amva.webp');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #111a11;
-  background-blend-mode: multiply;
+  height: 46px; width: 46px; object-fit: contain;
+  display: block; flex-shrink: 0;
 }
 @keyframes logoFloat {
   0%, 100% { transform: translateY(0px); }
