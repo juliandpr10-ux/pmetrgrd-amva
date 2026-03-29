@@ -68,12 +68,13 @@ body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: var(--bg); co
 
 /* ── Views + transiciones ── */
 .view { display: none; }
-.view.active {
-  display: block;
-  animation: viewEnter .42s cubic-bezier(.22,1,.36,1) both;
+.view.active { display: block; }
+/* Transición solo en vistas que no son la landing */
+.view.active:not(#view-landing) {
+  animation: viewEnter .38s cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes viewEnter {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -470,16 +471,25 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
+  /* Fallback cuando las fotos no cargaron aún */
+  background: linear-gradient(145deg, #0d2412 0%, #091a0a 50%, #071508 100%);
 }
 .landing-bg { position: absolute; inset: 0; z-index: 0; }
 .landing-bg-img {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  animation: landingSlide 18s infinite; opacity: 0;
+  opacity: 0;
 }
-.landing-bg-img:nth-child(1) { animation-delay: 0s; }
-.landing-bg-img:nth-child(2) { animation-delay: 6s; }
-.landing-bg-img:nth-child(3) { animation-delay: 12s; }
+/* Primera foto: visible desde el inicio */
+.landing-bg-img:nth-child(1) { animation: landingSlideFirst 18s infinite; opacity: 1; }
+.landing-bg-img:nth-child(2) { animation: landingSlide 18s infinite; animation-delay: 6s; }
+.landing-bg-img:nth-child(3) { animation: landingSlide 18s infinite; animation-delay: 12s; }
+@keyframes landingSlideFirst {
+  0%   { opacity: 1; transform: scale(1); }
+  33%  { opacity: 1; transform: scale(1.06); }
+  41%  { opacity: 0; }
+  100% { opacity: 0; }
+}
 @keyframes landingSlide {
   0%   { opacity: 0; transform: scale(1); }
   8%   { opacity: 1; }
@@ -489,7 +499,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .landing-bg-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(168deg, rgba(5,14,4,.88) 0%, rgba(8,22,6,.7) 48%, rgba(4,12,3,.92) 100%);
+  background: linear-gradient(168deg, rgba(5,14,4,.75) 0%, rgba(8,22,6,.55) 48%, rgba(4,12,3,.80) 100%);
   z-index: 1;
 }
 /* Logo esquina */
