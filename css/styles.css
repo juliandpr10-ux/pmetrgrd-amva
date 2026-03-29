@@ -35,13 +35,14 @@ body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: var(--bg); co
   border-bottom: 3px solid var(--green-pri);
   padding: 0 24px;
   display: flex; align-items: center; justify-content: space-between;
-  height: 72px; position: sticky; top: 0; z-index: 50;
+  height: 62px; position: sticky; top: 0; z-index: 50;
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .topbar-logo-img {
-  height: 56px; width: 56px; object-fit: contain;
-  border-radius: 6px; display: block;
-  mix-blend-mode: screen;
+  height: 40px; width: 40px; object-fit: contain;
+  display: block;
+  mix-blend-mode: multiply;
+  filter: brightness(1.1);
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-icon {
@@ -384,7 +385,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   }
   .brand-name { font-size: 13px; }
   .brand-sub  { font-size: 10px; }
-  .brand img  { height: 36px !important; width: 36px !important; }
+  .brand img, .topbar-logo-img { height: 34px !important; width: 34px !important; }
   /* Ocultar botones de descarga y edición en móvil — solo vista */
   .topbar-right { display: none !important; }
   /* Fila 2: nav ocupa todo el ancho */
@@ -476,26 +477,28 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
-  /* Fondo verde AMVA siempre visible — nunca negro */
-  background: linear-gradient(145deg, #1c5e28 0%, #2d7a3a 45%, #1c5e28 100%);
+    background: #060d07;
 }
 .landing-bg { position: absolute; inset: 0; z-index: 0; }
 .landing-bg-img {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
   opacity: 0; animation: landingSlide 35s infinite;
+  will-change: opacity, transform;
 }
-.landing-bg-img:nth-child(1) { animation-delay: 0s; }
-.landing-bg-img:nth-child(2) { animation-delay: 7s; }
+/* Delays: cada imagen aparece 7s después de la anterior.
+   La animación fade-out termina en 24% de 35s = 8.4s → overlap de 1.4s con la siguiente. */
+.landing-bg-img:nth-child(1) { animation-delay:  0s; }
+.landing-bg-img:nth-child(2) { animation-delay:  7s; }
 .landing-bg-img:nth-child(3) { animation-delay: 14s; }
 .landing-bg-img:nth-child(4) { animation-delay: 21s; }
 .landing-bg-img:nth-child(5) { animation-delay: 28s; }
 @keyframes landingSlide {
-  0%   { opacity: 0; transform: scale(1); }
-  4%   { opacity: 1; }
-  17%  { opacity: 1; transform: scale(1.05); }
-  22%  { opacity: 0; }
-  100% { opacity: 0; }
+  0%    { opacity: 0; transform: scale(1); }
+  2%    { opacity: 1; }                        /* fade-in rápido: 0.7s */
+  18%   { opacity: 1; transform: scale(1.04); } /* visible + ken burns */
+  24%   { opacity: 0; }                        /* fade-out empieza a 6.3s, termina a 8.4s */
+  100%  { opacity: 0; }
 }
 .landing-bg-overlay {
   position: absolute; inset: 0; z-index: 1;
@@ -505,8 +508,19 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
     rgba(0,0,0,.50) 100%);
 }
 /* Logo esquina */
-.landing-logo-wrap { position: absolute; top: 28px; left: 32px; z-index: 5; display: flex; align-items: center; gap: 12px; }
+.landing-logo-wrap {
+  position: absolute; top: 24px; left: 28px; z-index: 5;
+  display: flex; align-items: center; gap: 0;
+  background: rgba(0,0,0,.28);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 16px; padding: 8px 16px 8px 10px;
+  animation: logoFloat 5s ease-in-out infinite;
+}
 .landing-logo-text { color: rgba(255,255,255,.72); font-size: 11px; line-height: 1.45; font-weight: 500; letter-spacing: .01em; }
+.landing-logo-label { padding-left: 10px; border-left: 1px solid rgba(255,255,255,.18); margin-left: 6px; }
+.landing-logo-label-top { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.90); line-height: 1.3; letter-spacing: .01em; }
+.landing-logo-label-bot { font-size: 10px; font-weight: 400; color: rgba(255,255,255,.55); line-height: 1.3; letter-spacing: .01em; }
 /* Año badge */
 .landing-year-badge {
   position: absolute; top: 30px; right: 32px; z-index: 5;
@@ -590,15 +604,12 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 
 /* ── Landing logo ── */
 .landing-amva-logo {
-  height: 72px; width: auto; object-fit: contain;
-  display: block;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,.5));
-  animation: logoFloat 4s ease-in-out infinite;
+  height: 46px; width: auto; object-fit: contain;
+  display: block; border-radius: 8px;
 }
 @keyframes logoFloat {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+  50%       { transform: translateY(-5px); }
 }
 
 /* ── PLAN VIEW ── */
