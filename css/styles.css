@@ -741,6 +741,55 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   font-size: 11px; font-weight: 600; color: var(--green-dark);
 }
 
+/* ── Mapa Valle de Aburrá 3D ── */
+.mapa-valle-wrap {
+  position: relative; margin: 16px 0 12px;
+  display: flex; justify-content: center;
+}
+.mapa-3d-perspectiva {
+  perspective: 680px; perspective-origin: 50% 108%;
+  width: 100%; max-width: 260px;
+}
+.mapa-valle-svg {
+  width: 100%; height: auto; display: block;
+  transform: rotateX(15deg);
+  transform-origin: 50% 100%;
+  border-radius: 8px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.07);
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+.mapa-3d-perspectiva:hover .mapa-valle-svg {
+  transform: rotateX(4deg);
+}
+.mun-poly {
+  cursor: pointer;
+  transition: filter .18s, fill-opacity .18s;
+}
+.mun-poly:hover {
+  filter: brightness(1.65) saturate(1.35);
+  fill-opacity: 0.96 !important;
+}
+/* Río animado: fluye de sur (Caldas) a norte (Barbosa) */
+.rio-abura {
+  animation: rioFluye 2.8s linear infinite;
+}
+@keyframes rioFluye { to { stroke-dashoffset: -27; } }
+
+/* Inset Antioquia — esquina superior derecha */
+.mapa-antioquia-inset {
+  position: absolute; top: 6px; right: 0;
+  width: 86px; z-index: 5;
+  border-radius: 7px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.15);
+  box-shadow: 0 4px 18px rgba(0,0,0,.55);
+}
+.mapa-antioquia-inset svg { display: block; width: 100%; height: auto; }
+
+@media (max-width: 640px) {
+  .mapa-antioquia-inset { width: 72px; }
+  .mapa-3d-perspectiva { max-width: 220px; }
+}
+
 /* Marco legal acordeon */
 .marco-item {
   border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; overflow: hidden;

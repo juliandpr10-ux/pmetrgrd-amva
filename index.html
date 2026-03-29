@@ -235,13 +235,181 @@
               <div class="plan-card-title-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--green-dark)" stroke-width="1.8"><path d="M10 2C6.69 2 4 4.69 4 8c0 5.25 6 10 6 10s6-4.75 6-10c0-3.31-2.69-6-6-6z"/><circle cx="10" cy="8" r="2"/></svg></div>
               Los 10 entes territoriales del Valle de Aburrá
             </div>
-            <div class="mun-grid" style="margin-bottom:14px">
-              <div class="mun-chip">Medellín</div><div class="mun-chip">Barbosa</div>
-              <div class="mun-chip">Girardota</div><div class="mun-chip">Copacabana</div>
-              <div class="mun-chip">Bello</div><div class="mun-chip">Itagüí</div>
-              <div class="mun-chip">Envigado</div><div class="mun-chip">Sabaneta</div>
-              <div class="mun-chip">La Estrella</div><div class="mun-chip">Caldas</div>
-            </div>
+            <!-- ── MAPA VALLE DE ABURRÁ ── -->
+            <div class="mapa-valle-wrap">
+
+              <!-- Inset Antioquia -->
+              <div class="mapa-antioquia-inset">
+                <svg viewBox="0 0 96 90" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <filter id="aGlow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                  </defs>
+                  <rect width="96" height="90" fill="#090f0b" rx="6"/>
+                  <text x="48" y="9" text-anchor="middle" font-size="5.5" fill="rgba(255,255,255,0.45)" font-family="sans-serif">Ubicación en Antioquia</text>
+                  <!-- Antioquia outline simplificado -->
+                  <polygon points="28,14 46,12 60,16 72,12 82,20 85,33 80,45 82,57 74,69 62,77 48,81 35,77 24,69 14,57 12,43 18,31 15,21"
+                    fill="#142018" stroke="rgba(255,255,255,0.22)" stroke-width="0.9"/>
+                  <ellipse cx="48" cy="46" rx="30" ry="23" fill="#1a3022" opacity="0.55"/>
+                  <!-- Valle de Aburrá marcado -->
+                  <ellipse cx="43" cy="63" rx="4.5" ry="6.5" fill="#66CC33" opacity="0.88" filter="url(#aGlow)"/>
+                  <circle cx="43" cy="63" r="6" fill="none" stroke="#66CC33" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.55"/>
+                  <line x1="48" y1="61" x2="60" y2="53" stroke="#66CC33" stroke-width="0.8" opacity="0.7"/>
+                  <text x="62" y="51" font-size="5" fill="#66CC33" font-weight="700" font-family="sans-serif">Valle de</text>
+                  <text x="62" y="57" font-size="5" fill="#66CC33" font-weight="700" font-family="sans-serif">Aburrá</text>
+                  <text x="48" y="88" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.2)" font-family="sans-serif">Colombia</text>
+                </svg>
+              </div>
+
+              <!-- Mapa principal 3D -->
+              <div class="mapa-3d-perspectiva">
+                <svg class="mapa-valle-svg" viewBox="0 0 260 445" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <!-- Terreno: gradiente radial simula depresión del valle -->
+                    <radialGradient id="vTerrain" cx="48%" cy="50%" r="60%">
+                      <stop offset="0%"   stop-color="#0f2015"/>
+                      <stop offset="22%"  stop-color="#1a3a22"/>
+                      <stop offset="48%"  stop-color="#2a5c35"/>
+                      <stop offset="72%"  stop-color="#3a7848"/>
+                      <stop offset="100%" stop-color="#4e9258"/>
+                    </radialGradient>
+                    <!-- Vertiente occidental (iluminada desde NO) -->
+                    <linearGradient id="wMtn" x1="1" y1="0.5" x2="0" y2="0.5">
+                      <stop offset="0%"  stop-color="#2a5c35" stop-opacity="0"/>
+                      <stop offset="55%" stop-color="#3e7848"/>
+                      <stop offset="100%" stop-color="#72b878" stop-opacity="0.65"/>
+                    </linearGradient>
+                    <!-- Vertiente oriental (en sombra) -->
+                    <linearGradient id="eMtn" x1="0" y1="0.5" x2="1" y2="0.5">
+                      <stop offset="0%"  stop-color="#2a5c35" stop-opacity="0"/>
+                      <stop offset="55%" stop-color="#245030"/>
+                      <stop offset="100%" stop-color="#3a6040" stop-opacity="0.55"/>
+                    </linearGradient>
+                    <!-- Luz cenital NO (hillshade) -->
+                    <linearGradient id="hShade" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%"  stop-color="rgba(255,255,220,0.09)"/>
+                      <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+                    </linearGradient>
+                    <!-- Sombra municipios (profundidad) -->
+                    <filter id="mDepth" x="-8%" y="-8%" width="122%" height="122%">
+                      <feDropShadow dx="1" dy="2" stdDeviation="1.8" flood-color="rgba(0,0,0,0.55)"/>
+                    </filter>
+                    <!-- Brillo texto -->
+                    <filter id="tGlow" x="-15%" y="-40%" width="130%" height="180%">
+                      <feDropShadow dx="0" dy="1" stdDeviation="1.8" flood-color="rgba(0,0,0,0.95)"/>
+                    </filter>
+                  </defs>
+
+                  <!-- Fondo base -->
+                  <rect width="260" height="445" fill="#090f0b"/>
+                  <!-- Capa de terreno (gradiente elevación) -->
+                  <rect width="260" height="445" fill="url(#vTerrain)"/>
+                  <!-- Hillshade direccional -->
+                  <rect width="260" height="445" fill="url(#hShade)" opacity="0.65"/>
+
+                  <!-- Cordillera occidental (iluminada) -->
+                  <path d="M0,0 Q28,90 16,180 Q8,270 14,360 Q18,410 0,445Z" fill="url(#wMtn)" opacity="0.52"/>
+                  <path d="M6,30 Q20,110 10,200 Q4,290 8,370" stroke="rgba(190,240,170,0.09)" stroke-width="5" fill="none"/>
+
+                  <!-- Cordillera oriental (en sombra) -->
+                  <path d="M260,0 Q234,90 246,180 Q254,270 250,360 Q246,410 260,445Z" fill="url(#eMtn)" opacity="0.48"/>
+
+                  <!-- Curvas de nivel (topografía) -->
+                  <g fill="none" stroke="#7ec87e" stroke-width="0.55" opacity="0.10">
+                    <ellipse cx="126" cy="222" rx="32" ry="46"/>
+                    <ellipse cx="126" cy="222" rx="58" ry="82"/>
+                    <ellipse cx="126" cy="222" rx="86" ry="118"/>
+                    <ellipse cx="126" cy="222" rx="115" ry="154"/>
+                  </g>
+
+                  <!-- ── Municipios ── -->
+                  <g filter="url(#mDepth)">
+                    <!-- Barbosa -->
+                    <polygon class="mun-poly" id="mp-barbosa"
+                      points="55,6 108,2 162,2 208,16 205,48 188,66 155,74 108,72 78,62 55,42"
+                      fill="#2d7040" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Girardota -->
+                    <polygon class="mun-poly" id="mp-girardota"
+                      points="62,58 78,63 108,73 155,74 188,66 200,85 192,118 158,124 112,120 78,112 62,90"
+                      fill="#318846" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Copacabana -->
+                    <polygon class="mun-poly" id="mp-copacabana"
+                      points="60,88 78,113 112,120 158,124 192,118 202,142 188,165 142,170 95,164 65,154 55,130"
+                      fill="#35924c" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Bello -->
+                    <polygon class="mun-poly" id="mp-bello"
+                      points="22,162 55,130 65,155 95,165 142,170 188,165 205,182 202,218 185,238 145,244 100,240 62,232 35,218 18,196"
+                      fill="#399c52" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Medellín (capital — tono más intenso) -->
+                    <polygon class="mun-poly" id="mp-medellin"
+                      points="15,228 35,218 62,232 100,240 145,244 185,238 205,258 208,308 194,338 162,350 125,353 90,346 60,333 35,314 18,284 12,256"
+                      fill="#1a6230" fill-opacity="0.87" stroke="#090f0b" stroke-width="1.5"/>
+                    <!-- Envigado (oriente) -->
+                    <polygon class="mun-poly" id="mp-envigado"
+                      points="162,350 194,338 208,308 222,340 214,376 188,390 162,382 148,358 150,344"
+                      fill="#2d7040" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Itagüí (occidente) -->
+                    <polygon class="mun-poly" id="mp-itagui"
+                      points="18,284 35,314 60,333 90,346 125,353 148,358 148,380 118,388 78,383 45,366 20,338 12,308"
+                      fill="#318846" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Sabaneta (más pequeño) -->
+                    <polygon class="mun-poly" id="mp-sabaneta"
+                      points="78,383 118,388 148,380 162,382 150,400 118,406 85,402 75,392"
+                      fill="#35924c" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- La Estrella -->
+                    <polygon class="mun-poly" id="mp-laestrella"
+                      points="20,338 45,366 78,383 75,393 85,402 118,406 150,400 152,420 118,430 72,428 38,413 18,380"
+                      fill="#399c52" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                    <!-- Caldas (sur) -->
+                    <polygon class="mun-poly" id="mp-caldas"
+                      points="36,416 72,430 118,430 152,420 162,436 143,452 88,455 50,450 28,434"
+                      fill="#3da658" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
+                  </g>
+
+                  <!-- Río Medellín / Aburrá (animado) -->
+                  <path class="rio-abura"
+                    d="M124,453 C122,435 120,418 119,404 118,392 119,378 120,362 120,344 119,322 118,302 117,278 116,258 115,238 115,218 115,198 116,178 118,160 120,140 120,122 121,102 121,82 121,62 122,44 124,26 125,12"
+                    fill="none" stroke="#5bb8e8" stroke-width="2.2" stroke-linecap="round"
+                    stroke-dasharray="6,3" opacity="0.8"/>
+                  <!-- Label río -->
+                  <text font-size="6" fill="rgba(91,184,232,0.60)" font-style="italic"
+                    font-family="sans-serif" text-anchor="middle"
+                    transform="translate(112,195) rotate(-84)">Río Aburrá</text>
+
+                  <!-- ── Etiquetas municipios ── -->
+                  <g font-family="'DM Sans','Segoe UI',Arial,sans-serif"
+                     fill="rgba(255,255,255,0.93)" text-anchor="middle"
+                     filter="url(#tGlow)" pointer-events="none">
+                    <text x="128" y="41"  font-size="8"   font-weight="700">Barbosa</text>
+                    <text x="126" y="96"  font-size="7.5">Girardota</text>
+                    <text x="124" y="140" font-size="7.5">Copacabana</text>
+                    <text x="112" y="205" font-size="8.5" font-weight="600">Bello</text>
+                    <text x="108" y="295" font-size="10"  font-weight="700">Medellín</text>
+                    <text x="184" y="366" font-size="7">Envigado</text>
+                    <text x="72"  y="350" font-size="7.5">Itagüí</text>
+                    <text x="128" y="394" font-size="6.5">Sabaneta</text>
+                    <text x="65"  y="415" font-size="7">La Estrella</text>
+                    <text x="96"  y="441" font-size="8">Caldas</text>
+                  </g>
+
+                  <!-- Flecha Norte -->
+                  <g transform="translate(238,22)">
+                    <circle r="11" fill="rgba(0,0,0,0.42)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+                    <polygon points="0,-8 2.5,2 0,0 -2.5,2" fill="rgba(255,255,255,0.92)"/>
+                    <polygon points="0,8 2.5,-2 0,0 -2.5,-2"  fill="rgba(255,255,255,0.28)"/>
+                    <text x="0" y="18" text-anchor="middle" font-size="5.5" fill="rgba(255,255,255,0.48)" font-family="sans-serif" font-weight="700">N</text>
+                  </g>
+
+                  <!-- Escala gráfica -->
+                  <g transform="translate(10,430)" font-family="sans-serif">
+                    <rect x="0"  y="0" width="20" height="2.5" fill="rgba(255,255,255,0.65)"/>
+                    <rect x="20" y="0" width="20" height="2.5" fill="rgba(255,255,255,0.25)"/>
+                    <text x="0"  y="10" font-size="5" fill="rgba(255,255,255,0.38)">0</text>
+                    <text x="16" y="10" font-size="5" fill="rgba(255,255,255,0.38)">10</text>
+                    <text x="30" y="10" font-size="5" fill="rgba(255,255,255,0.38)">20 km</text>
+                  </g>
+                </svg>
+              </div>
+            </div><!-- /mapa-valle-wrap -->
             <div class="plan-p" style="font-size:12px">El Valle de Aburrá tiene <strong>1.157 km²</strong> de extensión, con alturas de 1.300 a más de 2.500 msnm. Su geografía de valle estrecho rodeado de laderas empinadas lo hace especialmente expuesto a múltiples tipos de eventos.</div>
             <div class="plan-p" style="font-size:12px">La precipitación oscila entre <strong>1.400 y 2.500 mm/año</strong>, con dos temporadas de lluvias intensas (marzo–mayo y septiembre–noviembre) que coinciden con la mayor ocurrencia de eventos adversos.</div>
           </div>
