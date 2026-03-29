@@ -39,10 +39,13 @@ body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: var(--bg); co
   box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
 .topbar-logo-img {
-  height: 40px; width: 40px; object-fit: contain;
-  display: block;
-  mix-blend-mode: multiply;
-  filter: brightness(1.1);
+  width: 40px; height: 40px; flex-shrink: 0;
+  background-image: url('../assets/logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: var(--green-dark);
+  background-blend-mode: multiply;
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-icon {
@@ -477,35 +480,39 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
-    background: #060d07;
+  background: #000;
 }
 .landing-bg { position: absolute; inset: 0; z-index: 0; }
 .landing-bg-img {
   position: absolute; inset: 0;
   background-size: cover; background-position: center;
-  opacity: 0; animation: landingSlide 35s infinite;
+  opacity: 0; animation: landingSlide 25s infinite;
   will-change: opacity, transform;
 }
-/* Delays: cada imagen aparece 7s después de la anterior.
-   La animación fade-out termina en 24% de 35s = 8.4s → overlap de 1.4s con la siguiente. */
+/* Ciclo 25s, 5 imágenes cada 5s. Fade-out termina en 28% = 7s → overlap 2s con siguiente. */
 .landing-bg-img:nth-child(1) { animation-delay:  0s; }
-.landing-bg-img:nth-child(2) { animation-delay:  7s; }
-.landing-bg-img:nth-child(3) { animation-delay: 14s; }
-.landing-bg-img:nth-child(4) { animation-delay: 21s; }
-.landing-bg-img:nth-child(5) { animation-delay: 28s; }
+.landing-bg-img:nth-child(2) { animation-delay:  5s; }
+.landing-bg-img:nth-child(3) { animation-delay: 10s; }
+.landing-bg-img:nth-child(4) { animation-delay: 15s; }
+.landing-bg-img:nth-child(5) { animation-delay: 20s; }
 @keyframes landingSlide {
   0%    { opacity: 0; transform: scale(1); }
-  2%    { opacity: 1; }                        /* fade-in rápido: 0.7s */
-  18%   { opacity: 1; transform: scale(1.04); } /* visible + ken burns */
-  24%   { opacity: 0; }                        /* fade-out empieza a 6.3s, termina a 8.4s */
+  3%    { opacity: 1; }                          /* fade-in 0.75s */
+  18%   { opacity: 1; transform: scale(1.04); }  /* visible + ken burns */
+  28%   { opacity: 0; }                          /* fade-out: 4.5s→7s; overlap con siguiente */
   100%  { opacity: 0; }
 }
 .landing-bg-overlay {
   position: absolute; inset: 0; z-index: 1;
-  background: linear-gradient(to bottom,
-    rgba(0,0,0,.35) 0%,
-    rgba(0,0,0,.20) 50%,
-    rgba(0,0,0,.50) 100%);
+  background:
+    /* vignette central donde vive el texto — zona de máxima legibilidad */
+    radial-gradient(ellipse 80% 60% at 50% 48%, rgba(0,0,0,.55) 0%, transparent 100%),
+    /* oscurece bordes y parte inferior (stats) */
+    linear-gradient(to top,  rgba(0,0,0,.65) 0%, rgba(0,0,0,.15) 35%),
+    /* oscurece parte superior (logo/badge) */
+    linear-gradient(to bottom, rgba(0,0,0,.45) 0%, transparent 22%),
+    /* capa base homogénea */
+    rgba(0,0,0,.28);
 }
 /* Logo esquina */
 .landing-logo-wrap {
@@ -543,11 +550,12 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .landing-title {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 42px; font-weight: 700; color: #ffffff; line-height: 1.2;
-  letter-spacing: -.01em; text-shadow: 0 4px 40px rgba(0,0,0,.5);
+  letter-spacing: -.01em;
+  text-shadow: 0 2px 4px rgba(0,0,0,.9), 0 8px 32px rgba(0,0,0,.7);
   margin: 0 0 4px;
 }
 .landing-rule { width: 48px; height: 2px; background: var(--green-pri); margin: 22px auto; border-radius: 1px; opacity: .6; }
-.landing-sub { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 34px; line-height: 1.68; max-width: 500px; margin-left: auto; margin-right: auto; }
+.landing-sub { font-size: 14px; color: rgba(255,255,255,.75); margin-bottom: 34px; line-height: 1.68; max-width: 500px; margin-left: auto; margin-right: auto; text-shadow: 0 1px 8px rgba(0,0,0,.8); }
 /* Botones */
 .landing-btns { display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .landing-btn {
@@ -604,8 +612,13 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 
 /* ── Landing logo ── */
 .landing-amva-logo {
-  height: 46px; width: auto; object-fit: contain;
-  display: block; border-radius: 8px;
+  width: 44px; height: 44px; flex-shrink: 0;
+  background-image: url('../assets/logo-amva.webp');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #111a11;
+  background-blend-mode: multiply;
 }
 @keyframes logoFloat {
   0%, 100% { transform: translateY(0px); }
@@ -640,7 +653,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 
 .plan-hero {
-  background: url('../assets/rio-amva.jpg') center/cover no-repeat;
+  background: url('../assets/radar-siata.jpg') center/cover no-repeat;
   border-radius: var(--r); padding: 40px 44px; margin-bottom: 28px;
   color: white; position: relative; overflow: hidden;
   box-shadow: 0 6px 28px rgba(0,0,0,.4);
@@ -668,14 +681,16 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .plan-badge svg { width: 13px; height: 13px; }
 .plan-dl-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--green-pri); color: var(--green-dark);
-  border: none; border-radius: var(--r-sm); padding: 10px 20px;
-  font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s;
-  text-decoration: none; margin-top: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  background: rgba(255,255,255,.12); color: white;
+  border: 1px solid rgba(255,255,255,.28); border-radius: 8px;
+  padding: 14px 16px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .22s;
+  text-decoration: none; text-align: center;
 }
-.plan-dl-btn:hover { background: white; }
-.plan-dl-btn svg { width: 16px; height: 16px; }
+.plan-dl-btn:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.5); transform: translateY(-1px); }
+.plan-dl-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 .plan-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
 .plan-card {
