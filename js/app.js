@@ -68,6 +68,13 @@ function syncTitlesFromRaw() {
   )));
 }
 
+function toggleKMore(btn, count) {
+  const cards = btn.previousElementSibling;
+  const expanded = cards.style.display !== 'none';
+  cards.style.display = expanded ? 'none' : 'block';
+  btn.textContent = expanded ? '\u25BC Ver ' + count + ' resultados m\u00e1s' : '\u25B2 Ocultar resultados';
+}
+
 function loadFromLocalStorage() {
   try {
     const saved = localStorage.getItem(LS_KEY);
@@ -886,7 +893,7 @@ function renderKanban() {
     const more = hiddenItems.length > 0
       ? `<div class="k-more-wrap">
           <div class="k-more-cards" style="display:none">${hiddenItems.map(cardFn).join('')}</div>
-          <button class="k-more-btn" onclick="this.previousElementSibling.style.display='block';this.style.display='none'">▼ Ver ${hiddenItems.length} resultados más</button>
+          <button class="k-more-btn" onclick="toggleKMore(this,${hiddenItems.length})">▼ Ver ${hiddenItems.length} resultados más</button>
         </div>` : '';
     return `<div class="k-col">
       <div class="k-col-head">
