@@ -647,15 +647,14 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 /* Plan cards — grid uniforme */
 .plan-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 24px;
 }
 /* Legacy aliases — por si quedan referencias */
 .plan-main-grid, .plan-section-grid { display: contents; }
 .plan-col-stack { display: contents; }
-.plan-card { min-height: 160px; }
 
 @media (max-width: 900px) {
   .plan-hero-inner { flex-direction: column; }
@@ -706,6 +705,8 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .plan-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
   padding: 22px 24px; box-shadow: var(--shadow);
+  border-top: 3px solid var(--green-pri);
+  box-sizing: border-box; width: 100%; overflow: hidden; min-height: 160px;
 }
 .plan-card-full {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
@@ -742,11 +743,11 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .plan-obj-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
 
 /* Escenarios de riesgo */
-.riesgo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.riesgo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow: hidden; }
 .riesgo-item {
   background: var(--surface2); border-radius: var(--r-sm); padding: 12px;
   border: 1px solid var(--border); text-align: center;
-  transition: all .2s; cursor: pointer;
+  transition: all .2s; cursor: pointer; min-width: 0; overflow: hidden;
 }
 .riesgo-item:hover { background: var(--green-light); border-color: var(--green-pri); transform: translateY(-2px); }
 .riesgo-icon { font-size: 22px; margin-bottom: 6px; display: inline-block; transition: transform .2s; }
