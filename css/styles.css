@@ -644,21 +644,23 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .plan-hero-stat-n { font-size: 24px; font-weight: 700; color: white; line-height: 1; margin-bottom: 3px; }
 .plan-hero-stat-l { font-size: 10px; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .06em; line-height: 1.3; }
 
-/* Plan main grid */
-.plan-main-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 18px; align-items: start; margin-bottom: 18px;
+/* Plan cards — grid uniforme */
+.plan-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
 }
-.plan-col-stack { display: flex; flex-direction: column; gap: 18px; }
-.plan-col-stack > .plan-card { flex: 1; min-height: 0; }
-.plan-card { min-height: 120px; }
-.plan-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
-.plan-section-grid > .plan-card { height: 100%; }
+/* Legacy aliases — por si quedan referencias */
+.plan-main-grid, .plan-section-grid { display: contents; }
+.plan-col-stack { display: contents; }
+.plan-card { min-height: 160px; }
 
 @media (max-width: 900px) {
   .plan-hero-inner { flex-direction: column; }
   .plan-hero-side { width: 100%; }
-  .plan-main-grid { grid-template-columns: 1fr; }
+  .plan-cards-grid { grid-template-columns: 1fr; }
 }
 
 .plan-hero {
@@ -787,7 +789,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .mapa-3d-perspectiva {
   perspective: 680px; perspective-origin: 50% 108%;
-  width: 100%; max-width: 340px;
+  width: 100%; max-width: 320px;
 }
 .mapa-valle-svg {
   width: 100%; height: auto; display: block;
@@ -917,7 +919,6 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .plan-stat-lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; }
 
 @media (max-width: 900px) {
-  .plan-section-grid { grid-template-columns: 1fr; }
   .riesgo-grid { grid-template-columns: repeat(2, 1fr); }
   .mun-grid { grid-template-columns: repeat(3, 1fr); }
   .plan-stats-strip { grid-template-columns: repeat(2, 1fr); }
