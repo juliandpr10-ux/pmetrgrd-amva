@@ -227,196 +227,6 @@
               <div class="plan-card-title-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--green-dark)" stroke-width="1.8"><path d="M10 2C6.69 2 4 4.69 4 8c0 5.25 6 10 6 10s6-4.75 6-10c0-3.31-2.69-6-6-6z"/><circle cx="10" cy="8" r="2"/></svg></div>
               Los 10 entes territoriales del Valle de Aburrá
             </div>
-            <!-- ── MAPA VALLE DE ABURRÁ ── -->
-            <div class="mapa-valle-wrap">
-
-              <!-- Inset Antioquia -->
-              <div class="mapa-antioquia-inset">
-                <svg viewBox="0 0 96 90" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <filter id="aGlow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                  </defs>
-                  <rect width="96" height="90" fill="#090f0b" rx="6"/>
-                  <text x="48" y="9" text-anchor="middle" font-size="5.5" fill="rgba(255,255,255,0.45)" font-family="sans-serif">Ubicación en Antioquia</text>
-                  <polygon points="28,14 46,12 60,16 72,12 82,20 85,33 80,45 82,57 74,69 62,77 48,81 35,77 24,69 14,57 12,43 18,31 15,21"
-                    fill="#142018" stroke="rgba(255,255,255,0.22)" stroke-width="0.9"/>
-                  <ellipse cx="48" cy="46" rx="30" ry="23" fill="#1a3022" opacity="0.55"/>
-                  <ellipse cx="43" cy="63" rx="4.5" ry="6.5" fill="#66CC33" opacity="0.88" filter="url(#aGlow)"/>
-                  <circle cx="43" cy="63" r="6" fill="none" stroke="#66CC33" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.55"/>
-                  <line x1="48" y1="61" x2="60" y2="53" stroke="#66CC33" stroke-width="0.8" opacity="0.7"/>
-                  <text x="62" y="51" font-size="5" fill="#66CC33" font-weight="700" font-family="sans-serif">Valle de</text>
-                  <text x="62" y="57" font-size="5" fill="#66CC33" font-weight="700" font-family="sans-serif">Aburrá</text>
-                  <text x="48" y="88" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.2)" font-family="sans-serif">Colombia</text>
-                </svg>
-              </div>
-
-              <!-- Mapa principal 3D -->
-              <div class="mapa-3d-perspectiva">
-                <svg class="mapa-valle-svg" viewBox="0 0 420 540" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <radialGradient id="vTerrain" cx="48%" cy="50%" r="60%">
-                      <stop offset="0%"   stop-color="#0f2015"/>
-                      <stop offset="22%"  stop-color="#1a3a22"/>
-                      <stop offset="48%"  stop-color="#2a5c35"/>
-                      <stop offset="72%"  stop-color="#3a7848"/>
-                      <stop offset="100%" stop-color="#4e9258"/>
-                    </radialGradient>
-                    <linearGradient id="wMtn" x1="1" y1="0.5" x2="0" y2="0.5">
-                      <stop offset="0%"  stop-color="#2a5c35" stop-opacity="0"/>
-                      <stop offset="55%" stop-color="#3e7848"/>
-                      <stop offset="100%" stop-color="#72b878" stop-opacity="0.65"/>
-                    </linearGradient>
-                    <linearGradient id="eMtn" x1="0" y1="0.5" x2="1" y2="0.5">
-                      <stop offset="0%"  stop-color="#2a5c35" stop-opacity="0"/>
-                      <stop offset="55%" stop-color="#245030"/>
-                      <stop offset="100%" stop-color="#3a6040" stop-opacity="0.55"/>
-                    </linearGradient>
-                    <linearGradient id="hShade" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%"  stop-color="rgba(255,255,220,0.09)"/>
-                      <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
-                    </linearGradient>
-                    <filter id="mDepth" x="-8%" y="-8%" width="122%" height="122%">
-                      <feDropShadow dx="1" dy="2" stdDeviation="1.8" flood-color="rgba(0,0,0,0.55)"/>
-                    </filter>
-                    <filter id="tGlow" x="-15%" y="-40%" width="130%" height="180%">
-                      <feDropShadow dx="0" dy="1" stdDeviation="1.8" flood-color="rgba(0,0,0,0.95)"/>
-                    </filter>
-                  </defs>
-
-                  <rect width="420" height="540" fill="#090f0b"/>
-                  <rect width="420" height="540" fill="url(#vTerrain)"/>
-                  <rect width="420" height="540" fill="url(#hShade)" opacity="0.65"/>
-                  <path d="M0,0 Q40,120 24,240 Q10,360 18,460 Q22,500 0,540Z" fill="url(#wMtn)" opacity="0.52"/>
-                  <path d="M420,0 Q382,120 398,240 Q410,360 404,460 Q398,500 420,540Z" fill="url(#eMtn)" opacity="0.48"/>
-                  <g fill="none" stroke="#7ec87e" stroke-width="0.55" opacity="0.10">
-                    <ellipse cx="210" cy="270" rx="42" ry="58"/>
-                    <ellipse cx="210" cy="270" rx="82" ry="110"/>
-                    <ellipse cx="210" cy="270" rx="128" ry="162"/>
-                    <ellipse cx="210" cy="270" rx="175" ry="215"/>
-                  </g>
-
-                  <!-- ── Municipios — trazados desde imagen de referencia del Valle de Aburrá ── -->
-                  <g filter="url(#mDepth)">
-
-                    <!-- Barbosa: NE, forma alargada, el más septentrional -->
-                    <path class="mun-poly" id="mp-barbosa"
-                      onmouseenter="highlightMun('barbosa')" onmouseleave="clearHighlight()"
-                      d="M 256,70 256,45 276,13 316,4 370,4 416,31 416,113 390,144 356,157 310,149 280,131 266,103 Z"
-                      fill="#2d7040" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Girardota: franja este del valle, pequeño, sur de Barbosa -->
-                    <path class="mun-poly" id="mp-girardota"
-                      onmouseenter="highlightMun('girardota')" onmouseleave="clearHighlight()"
-                      d="M 256,132 256,72 266,103 280,131 310,149 356,157 390,157 416,157 416,193 390,207 350,216 316,210 280,198 260,171 Z"
-                      fill="#318846" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Copacabana: franja este, entre Girardota y Medellín -->
-                    <path class="mun-poly" id="mp-copacabana"
-                      onmouseenter="highlightMun('copacabana')" onmouseleave="clearHighlight()"
-                      d="M 256,230 256,171 260,171 280,198 316,210 350,216 390,207 416,207 416,247 390,265 350,276 310,270 276,258 Z"
-                      fill="#35924c" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Bello: grande, occidente del valle, noroccidental -->
-                    <path class="mun-poly" id="mp-bello"
-                      onmouseenter="highlightMun('bello')" onmouseleave="clearHighlight()"
-                      d="M 90,99 76,132 76,167 66,198 66,230 80,259 110,277 150,293 190,306 230,312 256,306 256,270 256,230 256,171 256,132 256,72 256,45 210,31 144,41 104,67 Z"
-                      fill="#399c52" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Medellín: municipio central, el más poblado, laderas oriental y occidental -->
-                    <path class="mun-poly" id="mp-medellin"
-                      onmouseenter="highlightMun('medellin')" onmouseleave="clearHighlight()"
-                      d="M 66,342 66,311 110,283 150,297 190,306 230,312 256,306 256,284 276,279 310,276 350,276 390,265 416,252 416,311 410,367 396,405 376,438 340,455 304,461 264,459 220,455 170,441 124,427 90,410 66,378 Z"
-                      fill="#1a6230" fill-opacity="0.88" stroke="#090f0b" stroke-width="1.5"/>
-
-                    <!-- Envigado: suroriental, al SE de Medellín, ladera oriental -->
-                    <path class="mun-poly" id="mp-envigado"
-                      onmouseenter="highlightMun('envigado')" onmouseleave="clearHighlight()"
-                      d="M 300,373 304,283 350,276 390,270 416,259 416,369 410,421 376,441 340,455 304,461 304,452 300,437 296,409 Z"
-                      fill="#2d7040" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Itagüí: suroccidental, pequeño y muy denso, al SO de Medellín -->
-                    <path class="mun-poly" id="mp-itagui"
-                      onmouseenter="highlightMun('itagui')" onmouseleave="clearHighlight()"
-                      d="M 64,410 66,378 90,410 124,427 170,441 220,455 236,462 220,477 190,486 144,481 100,468 64,441 Z"
-                      fill="#318846" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Sabaneta: el más pequeño de Colombia, entre Itagüí y Envigado -->
-                    <path class="mun-poly" id="mp-sabaneta"
-                      onmouseenter="highlightMun('sabaneta')" onmouseleave="clearHighlight()"
-                      d="M 232,475 236,462 264,461 304,461 304,437 296,409 300,437 292,423 276,441 244,445 Z"
-                      fill="#4aaa60" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- La Estrella: sur, entre Itagüí, Sabaneta y Caldas -->
-                    <path class="mun-poly" id="mp-laestrella"
-                      onmouseenter="highlightMun('laestrella')" onmouseleave="clearHighlight()"
-                      d="M 50,459 64,441 100,468 144,481 190,486 220,477 236,475 244,445 276,441 292,423 304,441 310,461 284,493 244,504 190,504 136,500 90,493 56,477 Z"
-                      fill="#399c52" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-
-                    <!-- Caldas: extremo sur, sale hacia el suroeste, límite sur del AMVA -->
-                    <path class="mun-poly" id="mp-caldas"
-                      onmouseenter="highlightMun('caldas')" onmouseleave="clearHighlight()"
-                      d="M 44,459 50,459 56,477 90,493 136,500 190,504 244,504 284,493 310,461 330,511 370,517 416,495 416,540 36,540 36,481 Z"
-                      fill="#3da658" fill-opacity="0.84" stroke="#090f0b" stroke-width="1.2"/>
-                  </g>
-
-                  <!-- Río Medellín / Aburrá — de sur a norte por el piso del valle -->
-                  <path class="rio-abura"
-                    d="M195,532 C192,515 190,498 192,482 C194,466 200,452 204,438
-                       C208,424 210,410 212,395 C214,380 215,364 218,350
-                       C221,336 226,322 232,308 C238,294 246,280 252,266
-                       C258,252 263,238 268,224 C273,210 278,196 283,182
-                       C288,168 293,154 300,140 C307,126 313,112 318,96"
-                    fill="none" stroke="#5bb8e8" stroke-width="2.2" stroke-linecap="round"
-                    stroke-dasharray="6,3" opacity="0.75"/>
-                  <text font-size="6.5" fill="rgba(91,184,232,0.58)" font-style="italic"
-                    font-family="sans-serif" text-anchor="middle"
-                    transform="translate(228,360) rotate(-80)">Río Aburrá</text>
-
-                  <!-- ── Etiquetas ── -->
-                  <g font-family="'DM Sans','Segoe UI',Arial,sans-serif"
-                     fill="rgba(255,255,255,0.93)" text-anchor="middle"
-                     filter="url(#tGlow)" pointer-events="none">
-                    <text x="340" y="78"  font-size="9.5" font-weight="700">Barbosa</text>
-                    <text x="346" y="182" font-size="8">Girardota</text>
-                    <text x="344" y="240" font-size="7.5">Copacabana</text>
-                    <text x="164" y="200" font-size="9"  font-weight="600">Bello</text>
-                    <text x="248" y="388" font-size="11" font-weight="700">Medellín</text>
-                    <text x="360" y="380" font-size="8">Envigado</text>
-                    <text x="155" y="452" font-size="7.5">Itagüí</text>
-                    <text x="270" y="448" font-size="6.5">Sabaneta</text>
-                    <text x="178" y="489" font-size="7.5">La Estrella</text>
-                    <text x="205" y="524" font-size="9"  font-weight="600">Caldas</text>
-                  </g>
-
-                  <!-- Flecha Norte -->
-                  <g transform="translate(394,26)">
-                    <circle r="11" fill="rgba(0,0,0,0.42)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
-                    <polygon points="0,-8 2.5,2 0,0 -2.5,2" fill="rgba(255,255,255,0.92)"/>
-                    <polygon points="0,8 2.5,-2 0,0 -2.5,-2" fill="rgba(255,255,255,0.28)"/>
-                    <text x="0" y="18" text-anchor="middle" font-size="5.5" fill="rgba(255,255,255,0.48)" font-family="sans-serif" font-weight="700">N</text>
-                  </g>
-
-                  <!-- Escala gráfica -->
-                  <g transform="translate(10,522)" font-family="sans-serif">
-                    <rect x="0"  y="0" width="25" height="2.5" fill="rgba(255,255,255,0.65)"/>
-                    <rect x="25" y="0" width="25" height="2.5" fill="rgba(255,255,255,0.25)"/>
-                    <text x="0"  y="10" font-size="5" fill="rgba(255,255,255,0.38)">0</text>
-                    <text x="20" y="10" font-size="5" fill="rgba(255,255,255,0.38)">10</text>
-                    <text x="40" y="10" font-size="5" fill="rgba(255,255,255,0.38)">20 km</text>
-                  </g>
-                </svg>
-              </div>
-            </div><!-- /mapa-valle-wrap -->
-
-            <!-- Panel info hover -->
-            <div class="mapa-info-panel" id="mapa-info-panel">
-              <div class="mapa-info-dot"></div>
-              <div>
-                <div class="mapa-info-name" id="mapa-info-mun">Valle de Aburrá</div>
-                <div class="mapa-info-sub" id="mapa-info-data">Pasa el cursor sobre un municipio</div>
-              </div>
-            </div>
-
             <!-- Tabla de datos DANE 2023 -->
             <details class="mapa-datos-details" open>
               <summary>Datos por ente territorial · Proyecciones DANE 2023</summary>
@@ -483,19 +293,19 @@
         </div>
       </div><!-- /plan-cards-grid -->
 
-      <!-- Modal escenario de riesgo -->
-      <div class="modal-overlay" id="riesgo-modal" onclick="closeRiesgo(event)">
-        <div class="modal-box" style="max-width:520px">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-            <div id="riesgo-modal-icon" style="font-size:32px"></div>
-            <div id="riesgo-modal-title" class="modal-title" style="font-size:16px"></div>
-            <button onclick="document.getElementById('riesgo-modal').classList.remove('open')" style="margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);line-height:1">×</button>
-          </div>
-          <div id="riesgo-modal-body" style="font-size:13px;color:var(--text);line-height:1.7"></div>
-        </div>
-      </div>
-
     </div><!-- /view-plan -->
+
+    <!-- Modal escenario de riesgo -->
+    <div class="modal-overlay" id="riesgo-modal" onclick="closeRiesgo(event)" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center">
+      <div class="modal-box" style="max-width:520px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <div id="riesgo-modal-icon" style="font-size:32px"></div>
+          <div id="riesgo-modal-title" class="modal-title" style="font-size:16px"></div>
+          <button onclick="document.getElementById('riesgo-modal').classList.remove('open')" style="margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);line-height:1">×</button>
+        </div>
+        <div id="riesgo-modal-body" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+      </div>
+    </div>
 
     <!-- DASHBOARD -->
     <div class="view" id="view-dashboard">
