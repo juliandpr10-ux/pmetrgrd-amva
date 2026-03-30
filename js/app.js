@@ -51,6 +51,23 @@ const LS_KEY = 'pmetrgrd_v2';
 function saveToLocalStorage() {
   try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e) {}
 }
+// Sobrescribe títulos de proyectos y actividades en S con los de RAW (fuente de verdad)
+function syncTitlesFromRaw() {
+  const titles = {};
+  RAW.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
+    p.proyectos.forEach(pr => {
+      titles[pr.id] = pr.title;
+      pr.actividades.forEach(a => { titles[a.id] = a.title; });
+    })
+  )));
+  S.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
+    p.proyectos.forEach(pr => {
+      if (titles[pr.id]) pr.title = titles[pr.id];
+      pr.actividades.forEach(a => { if (titles[a.id]) a.title = titles[a.id]; });
+    })
+  )));
+}
+
 function loadFromLocalStorage() {
   try {
     const saved = localStorage.getItem(LS_KEY);
@@ -58,6 +75,7 @@ function loadFromLocalStorage() {
     const parsed = JSON.parse(saved);
     if (!Array.isArray(parsed) || parsed.length !== RAW.length) return false;
     S = parsed;
+    syncTitlesFromRaw();
     return true;
   } catch(e) { return false; }
 }
@@ -1356,6 +1374,7 @@ function initFirebase() {
                 if (firebaseCount >= localCount) {
                   // Firebase tiene igual o más actividades — cargar y preservar ediciones
                   S = JSON.parse(JSON.stringify(data));
+                  syncTitlesFromRaw();
                 } else {
                   // Local tiene más actividades (nueva versión desplegada) — subir a Firebase
                   console.log(`Actualizando Firebase: local=${localCount} > firebase=${firebaseCount}`);
