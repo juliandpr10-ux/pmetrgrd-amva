@@ -2,18 +2,18 @@
 let editRef = null;
 const exp = {};
 
-// ── Mapa Valle de Aburrá — datos DANE 2018 ───────────────────────
+// ── Mapa Valle de Aburrá — datos DANE 2023 (proyecciones) ────────
 const MUN_DATA = {
-  barbosa:    { name: 'Barbosa',     area: 209, pop: 50671 },
-  girardota:  { name: 'Girardota',   area: 81,  pop: 59175 },
-  copacabana: { name: 'Copacabana',  area: 70,  pop: 75546 },
-  bello:      { name: 'Bello',       area: 142, pop: 479484 },
-  medellin:   { name: 'Medellín',    area: 382, pop: 2508452 },
-  envigado:   { name: 'Envigado',    area: 78,  pop: 230296 },
-  itagui:     { name: 'Itagüí',      area: 21,  pop: 271956 },
-  sabaneta:   { name: 'Sabaneta',    area: 15,  pop: 99026 },
-  laestrella: { name: 'La Estrella', area: 35,  pop: 74011 },
-  caldas:     { name: 'Caldas',      area: 196, pop: 80065 }
+  barbosa:    { name: 'Barbosa',     area: 209, pop: 58372 },
+  girardota:  { name: 'Girardota',   area: 81,  pop: 65816 },
+  copacabana: { name: 'Copacabana',  area: 70,  pop: 91848 },
+  bello:      { name: 'Bello',       area: 142, pop: 544764 },
+  medellin:   { name: 'Medellín',    area: 382, pop: 2769551 },
+  envigado:   { name: 'Envigado',    area: 78,  pop: 261849 },
+  itagui:     { name: 'Itagüí',      area: 21,  pop: 302987 },
+  sabaneta:   { name: 'Sabaneta',    area: 15,  pop: 115889 },
+  laestrella: { name: 'La Estrella', area: 35,  pop: 85779 },
+  caldas:     { name: 'Caldas',      area: 196, pop: 92817 }
 };
 function showMunInfo(id) {
   const d = MUN_DATA[id]; if (!d) return;
@@ -24,13 +24,27 @@ function showMunInfo(id) {
   if (dEl) dEl.textContent =
     d.area.toLocaleString('es-CO') + ' km²  ·  ' +
     d.pop.toLocaleString('es-CO') + ' hab.  ·  ' +
-    dens + ' hab/km²  ·  Censo DANE 2018';
+    dens + ' hab/km²  ·  Proy. DANE 2023';
 }
 function clearMunInfo() {
   const nEl = document.getElementById('mapa-info-mun');
   const dEl = document.getElementById('mapa-info-data');
   if (nEl) nEl.textContent = 'Valle de Aburrá';
   if (dEl) dEl.textContent = 'Pasa el cursor sobre un municipio';
+}
+function highlightMun(id) {
+  document.querySelectorAll('.mun-poly').forEach(p => p.classList.remove('mun-active'));
+  document.querySelectorAll('.mdt-row').forEach(r => r.classList.remove('mdt-active'));
+  const poly = document.getElementById('mp-' + id);
+  if (poly) poly.classList.add('mun-active');
+  const row = document.getElementById('mdt-' + id);
+  if (row) { row.classList.add('mdt-active'); row.scrollIntoView({block: 'nearest', behavior: 'smooth'}); }
+  showMunInfo(id);
+}
+function clearHighlight() {
+  document.querySelectorAll('.mun-poly').forEach(p => p.classList.remove('mun-active'));
+  document.querySelectorAll('.mdt-row').forEach(r => r.classList.remove('mdt-active'));
+  clearMunInfo();
 }
 
 const LS_KEY = 'pmetrgrd_v2';
@@ -837,23 +851,31 @@ function renderKanban() {
     else if (p < 100) cols[2].items.push(f);
     else cols[3].items.push(f);
   });
+  const mkCard = (col) => ({a, o, e, p, pr}) =>
+    `<div class="k-card" data-act="${a.id}" data-o="${o.id}" data-e="${e.id}" data-p="${p.id}" data-pr="${pr.id}">
+      <div class="k-card-title">${a.title}</div>
+      <div class="k-card-foot">
+        <span class="k-tag" style="background:${OBJ_COL[o.id]}18;color:${OBJ_COL[o.id]}">${o.proceso}</span>
+        <span style="font-size:10px;color:var(--text3)">${a.responsable || '—'}</span>
+        <span class="k-pct" style="color:${col.color}">${a.pct.toFixed(0)}%</span>
+        <button class="k-expand-btn" title="Expandir/colapsar" onclick="event.stopPropagation();const c=this.closest('.k-card');c.classList.toggle('k-card-expanded');this.textContent=c.classList.contains('k-card-expanded')?'▲':'▼'">▼</button>
+      </div>
+    </div>`;
   document.getElementById('kanban-root').innerHTML = cols.map(col => {
-    const cards = col.items.slice(0, 35).map(({a, o, e, p, pr}) =>
-      `<div class="k-card" data-act="${a.id}" data-o="${o.id}" data-e="${e.id}" data-p="${p.id}" data-pr="${pr.id}">
-        <div class="k-card-title">${a.title}</div>
-        <div class="k-card-foot">
-          <span class="k-tag" style="background:${OBJ_COL[o.id]}18;color:${OBJ_COL[o.id]}">${o.proceso}</span>
-          <span style="font-size:10px;color:var(--text3)">${a.responsable || '—'}</span>
-          <span class="k-pct" style="color:${col.color}">${a.pct.toFixed(0)}%</span>
-        </div>
-      </div>`).join('');
-    const ex = col.items.length > 35 ? `<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">+${col.items.length-35} más resultados</div>` : '';
+    const cardFn = mkCard(col);
+    const visible = col.items.slice(0, 35).map(cardFn).join('');
+    const hiddenItems = col.items.slice(35);
+    const more = hiddenItems.length > 0
+      ? `<div class="k-more-wrap">
+          <div class="k-more-cards" style="display:none">${hiddenItems.map(cardFn).join('')}</div>
+          <button class="k-more-btn" onclick="this.previousElementSibling.style.display='block';this.style.display='none'">▼ Ver ${hiddenItems.length} resultados más</button>
+        </div>` : '';
     return `<div class="k-col">
       <div class="k-col-head">
         <div class="k-col-title" style="color:${col.color}">${col.label}</div>
         <div class="k-count">${col.items.length}</div>
       </div>
-      ${cards}${ex}
+      ${visible}${more}
     </div>`;
   }).join('');
 }

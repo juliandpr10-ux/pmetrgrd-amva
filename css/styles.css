@@ -294,10 +294,26 @@ body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: var(--bg); co
   transition: box-shadow .15s, transform .1s; box-shadow: var(--shadow);
 }
 .k-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
-.k-card-title { font-size: 11px; line-height: 1.45; margin-bottom: 8px; color: var(--text); }
+.k-card-title {
+  font-size: 11px; line-height: 1.45; margin-bottom: 8px; color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.k-card-expanded .k-card-title { display: block; -webkit-line-clamp: unset; overflow: visible; }
 .k-card-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .k-tag { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
 .k-pct { font-size: 11px; font-weight: 700; margin-left: auto; }
+.k-expand-btn {
+  background: none; border: none; color: var(--text3); font-size: 9px;
+  cursor: pointer; padding: 0 3px; line-height: 1; flex-shrink: 0;
+}
+.k-expand-btn:hover { color: var(--green-pri); }
+.k-more-wrap { margin-top: 4px; }
+.k-more-btn {
+  width: 100%; background: var(--surface2); border: 1px dashed var(--border2);
+  color: var(--text3); font-size: 11px; padding: 8px; border-radius: var(--r-sm);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.k-more-btn:hover { background: var(--green-light); color: var(--green-pri); }
 
 /* ── Modal ── */
 .modal-overlay {
@@ -634,7 +650,10 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   gap: 18px; align-items: start; margin-bottom: 18px;
 }
 .plan-col-stack { display: flex; flex-direction: column; gap: 18px; }
-.plan-col-stack > .plan-card { flex: 1; }
+.plan-col-stack > .plan-card { flex: 1; min-height: 0; }
+.plan-card { min-height: 120px; }
+.plan-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
+.plan-section-grid > .plan-card { height: 100%; }
 
 @media (max-width: 900px) {
   .plan-hero-inner { flex-direction: column; }
@@ -682,7 +701,6 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .plan-dl-btn:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.5); transform: translateY(-1px); }
 .plan-dl-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-.plan-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
 .plan-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
   padding: 22px 24px; box-shadow: var(--shadow);
@@ -769,7 +787,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .mapa-3d-perspectiva {
   perspective: 680px; perspective-origin: 50% 108%;
-  width: 100%; max-width: 260px;
+  width: 100%; max-width: 340px;
 }
 .mapa-valle-svg {
   width: 100%; height: auto; display: block;
@@ -808,7 +826,7 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 
 @media (max-width: 640px) {
   .mapa-antioquia-inset { width: 72px; }
-  .mapa-3d-perspectiva { max-width: 220px; }
+  .mapa-3d-perspectiva { max-width: 280px; }
 }
 
 /* ── Panel info municipio hover ── */
@@ -861,6 +879,17 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .mdt-total { background: var(--surface2); font-weight: 700; border-top: 1px solid var(--border) !important; }
 .mdt-total span { color: var(--text) !important; }
 
+/* Cross-highlight active states */
+.mun-poly.mun-active {
+  filter: brightness(1.9) saturate(1.5);
+  fill-opacity: 1 !important;
+  stroke-width: 2 !important;
+}
+.mdt-row.mdt-active {
+  background: var(--green-light) !important;
+  border-left: 3px solid var(--green-pri);
+}
+
 /* Marco legal acordeon */
 .marco-item {
   border: 1px solid var(--border); border-radius: var(--r-sm); margin-bottom: 6px; overflow: hidden;
@@ -897,6 +926,13 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 @media (max-width: 640px) {
   .riesgo-grid { grid-template-columns: repeat(2, 1fr); }
   .mun-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Modo solo lectura en móvil — ocultar controles admin */
+  #btn-download, #btn-excel { display: none !important; }
+  .modal-foot .btn-save, .modal-foot .btn-clear { display: none !important; }
+  .f-section { display: none !important; }
+  /* Mapa touch-friendly */
+  .mapa-3d-perspectiva { perspective: none; transform: none; }
+  .mapa-valle-svg { touch-action: manipulation; }
 }
 
 /* ── KPI Strip ── */

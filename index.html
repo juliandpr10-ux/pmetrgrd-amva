@@ -260,7 +260,7 @@
 
               <!-- Mapa principal 3D -->
               <div class="mapa-3d-perspectiva">
-                <svg class="mapa-valle-svg" viewBox="0 0 260 445" xmlns="http://www.w3.org/2000/svg">
+                <svg class="mapa-valle-svg" viewBox="0 0 390 488" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <radialGradient id="vTerrain" cx="48%" cy="50%" r="60%">
                       <stop offset="0%"   stop-color="#0f2015"/>
@@ -291,101 +291,105 @@
                     </filter>
                   </defs>
 
-                  <rect width="260" height="445" fill="#090f0b"/>
-                  <rect width="260" height="445" fill="url(#vTerrain)"/>
-                  <rect width="260" height="445" fill="url(#hShade)" opacity="0.65"/>
-                  <path d="M0,0 Q28,90 16,180 Q8,270 14,360 Q18,410 0,445Z" fill="url(#wMtn)" opacity="0.52"/>
-                  <path d="M260,0 Q234,90 246,180 Q254,270 250,360 Q246,410 260,445Z" fill="url(#eMtn)" opacity="0.48"/>
+                  <rect width="390" height="488" fill="#090f0b"/>
+                  <rect width="390" height="488" fill="url(#vTerrain)"/>
+                  <rect width="390" height="488" fill="url(#hShade)" opacity="0.65"/>
+                  <path d="M0,0 Q38,110 22,220 Q10,330 18,420 Q22,455 0,488Z" fill="url(#wMtn)" opacity="0.52"/>
+                  <path d="M390,0 Q355,110 372,220 Q382,330 376,420 Q370,455 390,488Z" fill="url(#eMtn)" opacity="0.48"/>
                   <g fill="none" stroke="#7ec87e" stroke-width="0.55" opacity="0.10">
-                    <ellipse cx="126" cy="222" rx="32" ry="46"/>
-                    <ellipse cx="126" cy="222" rx="58" ry="82"/>
-                    <ellipse cx="126" cy="222" rx="86" ry="118"/>
-                    <ellipse cx="126" cy="222" rx="115" ry="154"/>
+                    <ellipse cx="195" cy="244" rx="40" ry="55"/>
+                    <ellipse cx="195" cy="244" rx="78" ry="100"/>
+                    <ellipse cx="195" cy="244" rx="120" ry="148"/>
+                    <ellipse cx="195" cy="244" rx="165" ry="196"/>
                   </g>
 
-                  <!-- ── Municipios — coordenadas derivadas de proporciones geográficas reales ── -->
-                  <!-- Norte→Sur: Barbosa · Girardota · Copacabana · Bello · Medellín      -->
-                  <!-- Sur (O→E): Itagüí · Sabaneta · Envigado; debajo: La Estrella · Caldas -->
+                  <!-- ── Municipios — proporciones geográficas reales Valle de Aburrá ── -->
+                  <!-- Norte→Sur: Barbosa · Girardota · Copacabana · Bello · Medellín    -->
+                  <!-- Sur: Itagüí · Sabaneta · Envigado · La Estrella · Caldas           -->
                   <g filter="url(#mDepth)">
-                    <!-- Barbosa: extremo norte donde el valle se abre hacia el Cauca -->
+                    <!-- Barbosa: extremo norte, municipio más extenso del norte, forma alargada -->
                     <polygon class="mun-poly" id="mp-barbosa"
-                      onmouseenter="showMunInfo('barbosa')" onmouseleave="clearMunInfo()"
-                      points="15,5 245,5 240,46 212,68 175,78 148,82 118,80 82,72 44,62 17,40"
+                      onmouseenter="highlightMun('barbosa')" onmouseleave="clearHighlight()"
+                      points="168,118 175,88 185,55 215,28 258,12 300,8 362,35 380,75 372,115 345,126 298,130 250,126 210,122"
                       fill="#2d7040" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Girardota -->
+                    <!-- Girardota: este del valle, al sur de Barbosa -->
                     <polygon class="mun-poly" id="mp-girardota"
-                      onmouseenter="showMunInfo('girardota')" onmouseleave="clearMunInfo()"
-                      points="17,40 44,62 82,72 118,80 148,82 175,78 212,68 218,96 208,124 170,134 142,138 112,135 78,126 42,114 18,88"
+                      onmouseenter="highlightMun('girardota')" onmouseleave="clearHighlight()"
+                      points="168,118 210,122 250,126 298,130 345,126 362,158 350,195 322,205 290,210 262,202 240,190 220,170 220,148"
                       fill="#318846" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Copacabana -->
+                    <!-- Copacabana: este del valle, sur de Girardota -->
                     <polygon class="mun-poly" id="mp-copacabana"
-                      onmouseenter="showMunInfo('copacabana')" onmouseleave="clearMunInfo()"
-                      points="18,88 42,114 78,126 112,135 142,138 170,134 208,124 212,150 202,174 165,184 138,188 108,185 73,177 40,164 17,140"
+                      onmouseenter="highlightMun('copacabana')" onmouseleave="clearHighlight()"
+                      points="220,170 240,190 262,202 290,210 322,205 345,225 335,255 308,264 276,268 250,260 232,248 225,240 220,205"
                       fill="#35924c" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Bello: se extiende hacia la cordillera occidental -->
+                    <!-- Bello: gran municipio occidental, limita con Medellín al sur -->
                     <polygon class="mun-poly" id="mp-bello"
-                      onmouseenter="showMunInfo('bello')" onmouseleave="clearMunInfo()"
-                      points="17,140 40,164 73,177 108,185 138,188 165,184 202,174 210,202 212,238 200,254 175,258 148,260 120,257 90,251 60,242 28,226 12,200 14,168"
+                      onmouseenter="highlightMun('bello')" onmouseleave="clearHighlight()"
+                      points="168,118 158,96 148,78 128,62 108,55 78,60 45,72 22,92 18,118 18,238 45,235 85,232 142,232 168,238 200,240 225,240 220,205 220,170 220,148"
                       fill="#399c52" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Medellín: el más extenso; se alarga hacia la cordillera oriental (Santa Elena) -->
+                    <!-- Medellín: municipio central y más extenso, abarca ambas laderas -->
                     <polygon class="mun-poly" id="mp-medellin"
-                      onmouseenter="showMunInfo('medellin')" onmouseleave="clearMunInfo()"
-                      points="12,200 28,226 60,242 90,251 120,257 148,260 175,258 200,254 212,238 220,270 225,315 222,344 215,358 198,354 175,360 152,362 130,362 108,360 88,352 62,340 38,348 15,358 12,315 10,272"
+                      onmouseenter="highlightMun('medellin')" onmouseleave="clearHighlight()"
+                      points="18,238 45,235 85,232 142,232 168,238 200,240 225,240 232,248 250,260 276,268 308,264 335,255 348,268 360,308 362,348 352,370 330,380 308,376 285,373 262,373 248,376 240,376 220,373 202,362 185,352 168,348 148,352 125,358 102,352 78,340 52,325 32,308 20,285"
                       fill="#1a6230" fill-opacity="0.87" stroke="#090f0b" stroke-width="1.5"/>
-                    <!-- Envigado: oriente del valle, al sur-este de Medellín -->
+                    <!-- Envigado: oriente, al sur de Medellín, con Cerro El Escobero -->
                     <polygon class="mun-poly" id="mp-envigado"
-                      onmouseenter="showMunInfo('envigado')" onmouseleave="clearMunInfo()"
-                      points="152,362 175,360 198,354 215,358 222,344 235,358 240,385 230,415 208,428 180,425 158,415 152,405"
+                      onmouseenter="highlightMun('envigado')" onmouseleave="clearHighlight()"
+                      points="262,373 285,373 308,376 330,380 352,370 368,385 372,422 358,450 332,458 305,455 280,440 258,422 252,400 248,376"
                       fill="#2d7040" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Itagüí: occidente, pequeño y muy denso, al suroeste de Medellín -->
+                    <!-- Itagüí: occidente, muy denso, al suroeste de Medellín -->
                     <polygon class="mun-poly" id="mp-itagui"
-                      onmouseenter="showMunInfo('itagui')" onmouseleave="clearMunInfo()"
-                      points="15,358 38,348 62,340 88,352 108,360 108,390 95,400 75,402 52,392 28,376 15,368"
+                      onmouseenter="highlightMun('itagui')" onmouseleave="clearHighlight()"
+                      points="20,285 32,308 52,325 78,340 102,352 125,358 148,352 168,348 168,373 158,392 138,402 115,405 88,398 62,382 38,362 22,342"
                       fill="#318846" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Sabaneta: el municipio más pequeño (15 km²), entre Itagüí y Envigado -->
+                    <!-- Sabaneta: municipio más pequeño de Colombia, entre Itagüí y Envigado -->
                     <polygon class="mun-poly" id="mp-sabaneta"
-                      onmouseenter="showMunInfo('sabaneta')" onmouseleave="clearMunInfo()"
-                      points="108,360 130,362 152,362 152,405 140,408 122,406 105,400 108,390"
+                      onmouseenter="highlightMun('sabaneta')" onmouseleave="clearHighlight()"
+                      points="168,348 185,352 202,362 220,373 240,376 248,376 252,400 238,412 218,418 195,415 175,405 162,392 168,373"
                       fill="#35924c" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- La Estrella: sur-occidente, limita con Itagüí, Sabaneta, Envigado y Caldas -->
+                    <!-- La Estrella: sur-occidente, al sur de Itagüí -->
                     <polygon class="mun-poly" id="mp-laestrella"
-                      onmouseenter="showMunInfo('laestrella')" onmouseleave="clearMunInfo()"
-                      points="15,368 28,376 52,392 75,402 95,400 108,390 105,400 122,406 140,408 152,405 158,415 152,428 128,438 92,440 58,434 28,420 14,400"
+                      onmouseenter="highlightMun('laestrella')" onmouseleave="clearHighlight()"
+                      points="22,342 38,362 62,382 88,398 115,405 138,402 158,392 162,392 175,405 195,415 218,418 238,412 252,400 258,422 248,438 225,450 195,455 162,452 132,445 100,435 68,420 40,402"
                       fill="#399c52" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
-                    <!-- Caldas: extremo sur, donde el valle vuelve a abrirse -->
+                    <!-- Caldas: extremo sur, donde el valle se abre hacia el sur -->
                     <polygon class="mun-poly" id="mp-caldas"
-                      onmouseenter="showMunInfo('caldas')" onmouseleave="clearMunInfo()"
-                      points="14,400 28,420 58,434 92,440 128,438 152,428 158,415 180,425 208,428 230,415 240,432 228,445 158,445 82,445 28,445 14,432"
+                      onmouseenter="highlightMun('caldas')" onmouseleave="clearHighlight()"
+                      points="40,402 68,420 100,435 132,445 162,452 195,455 225,450 248,438 258,422 280,440 305,455 332,458 325,475 275,478 215,480 155,478 100,470 58,460 32,448 28,428"
                       fill="#3da658" fill-opacity="0.83" stroke="#090f0b" stroke-width="1.2"/>
                   </g>
 
-                  <!-- Río Medellín / Aburrá (animado, recorre el valle de sur a norte) -->
+                  <!-- Río Medellín / Aburrá — recorre el valle de sur a norte -->
                   <path class="rio-abura"
-                    d="M124,445 C122,428 120,412 119,398 118,384 118,370 119,354 120,336 119,316 118,296 117,276 116,256 115,236 115,216 116,196 118,176 119,156 120,136 120,116 121,96 122,76 123,56 124,36 125,18 125,8"
+                    d="M190,485 C188,468 185,452 185,436 C185,420 188,408 190,395
+                       C192,382 190,368 188,355 C186,342 185,328 185,312
+                       C185,296 188,280 192,265 C196,250 210,238 220,226
+                       C230,214 240,202 255,190 C268,178 278,162 282,148
+                       C286,134 288,118 286,102 C284,88 282,72 284,56"
                     fill="none" stroke="#5bb8e8" stroke-width="2.2" stroke-linecap="round"
                     stroke-dasharray="6,3" opacity="0.8"/>
-                  <text font-size="6" fill="rgba(91,184,232,0.60)" font-style="italic"
+                  <text font-size="6.5" fill="rgba(91,184,232,0.60)" font-style="italic"
                     font-family="sans-serif" text-anchor="middle"
-                    transform="translate(112,198) rotate(-84)">Río Aburrá</text>
+                    transform="translate(178,320) rotate(-82)">Río Aburrá</text>
 
                   <!-- ── Etiquetas ── -->
                   <g font-family="'DM Sans','Segoe UI',Arial,sans-serif"
                      fill="rgba(255,255,255,0.93)" text-anchor="middle"
                      filter="url(#tGlow)" pointer-events="none">
-                    <text x="130" y="46"  font-size="8"   font-weight="700">Barbosa</text>
-                    <text x="128" y="100" font-size="7.5">Girardota</text>
-                    <text x="118" y="148" font-size="7.5">Copacabana</text>
-                    <text x="108" y="212" font-size="8.5" font-weight="600">Bello</text>
-                    <text x="115" y="290" font-size="10"  font-weight="700">Medellín</text>
-                    <text x="196" y="390" font-size="7">Envigado</text>
-                    <text x="62"  y="374" font-size="7.5">Itagüí</text>
-                    <text x="130" y="390" font-size="6">Sabaneta</text>
-                    <text x="78"  y="422" font-size="7">La Estrella</text>
-                    <text x="122" y="438" font-size="8">Caldas</text>
+                    <text x="278" y="72"  font-size="9"   font-weight="700">Barbosa</text>
+                    <text x="282" y="168" font-size="8">Girardota</text>
+                    <text x="285" y="235" font-size="8">Copacabana</text>
+                    <text x="105" y="190" font-size="9"  font-weight="600">Bello</text>
+                    <text x="175" y="310" font-size="11" font-weight="700">Medellín</text>
+                    <text x="308" y="418" font-size="8">Envigado</text>
+                    <text x="90"  y="368" font-size="8">Itagüí</text>
+                    <text x="208" y="396" font-size="7">Sabaneta</text>
+                    <text x="148" y="440" font-size="7.5">La Estrella</text>
+                    <text x="188" y="466" font-size="8.5">Caldas</text>
                   </g>
 
                   <!-- Flecha Norte -->
-                  <g transform="translate(238,22)">
+                  <g transform="translate(366,22)">
                     <circle r="11" fill="rgba(0,0,0,0.42)" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
                     <polygon points="0,-8 2.5,2 0,0 -2.5,2" fill="rgba(255,255,255,0.92)"/>
                     <polygon points="0,8 2.5,-2 0,0 -2.5,-2" fill="rgba(255,255,255,0.28)"/>
@@ -393,12 +397,12 @@
                   </g>
 
                   <!-- Escala gráfica -->
-                  <g transform="translate(10,430)" font-family="sans-serif">
-                    <rect x="0"  y="0" width="20" height="2.5" fill="rgba(255,255,255,0.65)"/>
-                    <rect x="20" y="0" width="20" height="2.5" fill="rgba(255,255,255,0.25)"/>
+                  <g transform="translate(10,468)" font-family="sans-serif">
+                    <rect x="0"  y="0" width="24" height="2.5" fill="rgba(255,255,255,0.65)"/>
+                    <rect x="24" y="0" width="24" height="2.5" fill="rgba(255,255,255,0.25)"/>
                     <text x="0"  y="10" font-size="5" fill="rgba(255,255,255,0.38)">0</text>
-                    <text x="16" y="10" font-size="5" fill="rgba(255,255,255,0.38)">10</text>
-                    <text x="30" y="10" font-size="5" fill="rgba(255,255,255,0.38)">20 km</text>
+                    <text x="19" y="10" font-size="5" fill="rgba(255,255,255,0.38)">10</text>
+                    <text x="38" y="10" font-size="5" fill="rgba(255,255,255,0.38)">20 km</text>
                   </g>
                 </svg>
               </div>
@@ -413,22 +417,22 @@
               </div>
             </div>
 
-            <!-- Tabla de datos DANE 2018 -->
+            <!-- Tabla de datos DANE 2023 -->
             <details class="mapa-datos-details" open>
-              <summary>Datos por ente territorial · Censo DANE 2018</summary>
+              <summary>Datos por ente territorial · Proyecciones DANE 2023</summary>
               <div class="mapa-datos-tabla">
                 <div class="mdt-row mdt-head"><span>Municipio</span><span>Área km²</span><span>Habitantes</span><span>Hab/km²</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('barbosa')"    onmouseleave="clearMunInfo()"><span>Barbosa</span>    <span>209</span><span>50.671</span>    <span>242</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('girardota')"  onmouseleave="clearMunInfo()"><span>Girardota</span>  <span>81</span> <span>59.175</span>    <span>730</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('copacabana')" onmouseleave="clearMunInfo()"><span>Copacabana</span> <span>70</span> <span>75.546</span>    <span>1.079</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('bello')"      onmouseleave="clearMunInfo()"><span>Bello</span>      <span>142</span><span>479.484</span>   <span>3.377</span></div>
-                <div class="mdt-row mdt-capital" onmouseenter="showMunInfo('medellin')"   onmouseleave="clearMunInfo()"><span>Medellín ★</span> <span>382</span><span>2.508.452</span> <span>6.567</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('envigado')"   onmouseleave="clearMunInfo()"><span>Envigado</span>   <span>78</span> <span>230.296</span>   <span>2.952</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('itagui')"     onmouseleave="clearMunInfo()"><span>Itagüí</span>     <span>21</span> <span>271.956</span>   <span>12.950</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('sabaneta')"   onmouseleave="clearMunInfo()"><span>Sabaneta</span>   <span>15</span> <span>99.026</span>    <span>6.602</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('laestrella')" onmouseleave="clearMunInfo()"><span>La Estrella</span><span>35</span> <span>74.011</span>    <span>2.115</span></div>
-                <div class="mdt-row" onmouseenter="showMunInfo('caldas')"     onmouseleave="clearMunInfo()"><span>Caldas</span>     <span>196</span><span>80.065</span>    <span>409</span></div>
-                <div class="mdt-row mdt-total"><span>Total</span><span>1.229</span><span>3.928.682</span><span>3.197</span></div>
+                <div class="mdt-row" id="mdt-barbosa"    onmouseenter="highlightMun('barbosa')"    onmouseleave="clearHighlight()"><span>Barbosa</span>    <span>209</span><span>58.372</span>    <span>279</span></div>
+                <div class="mdt-row" id="mdt-girardota"  onmouseenter="highlightMun('girardota')"  onmouseleave="clearHighlight()"><span>Girardota</span>  <span>81</span> <span>65.816</span>    <span>812</span></div>
+                <div class="mdt-row" id="mdt-copacabana" onmouseenter="highlightMun('copacabana')" onmouseleave="clearHighlight()"><span>Copacabana</span> <span>70</span> <span>91.848</span>    <span>1.312</span></div>
+                <div class="mdt-row" id="mdt-bello"      onmouseenter="highlightMun('bello')"      onmouseleave="clearHighlight()"><span>Bello</span>      <span>142</span><span>544.764</span>   <span>3.836</span></div>
+                <div class="mdt-row mdt-capital" id="mdt-medellin" onmouseenter="highlightMun('medellin')"   onmouseleave="clearHighlight()"><span>Medellín ★</span> <span>382</span><span>2.769.551</span> <span>7.250</span></div>
+                <div class="mdt-row" id="mdt-envigado"   onmouseenter="highlightMun('envigado')"   onmouseleave="clearHighlight()"><span>Envigado</span>   <span>78</span> <span>261.849</span>   <span>3.357</span></div>
+                <div class="mdt-row" id="mdt-itagui"     onmouseenter="highlightMun('itagui')"     onmouseleave="clearHighlight()"><span>Itagüí</span>     <span>21</span> <span>302.987</span>   <span>14.428</span></div>
+                <div class="mdt-row" id="mdt-sabaneta"   onmouseenter="highlightMun('sabaneta')"   onmouseleave="clearHighlight()"><span>Sabaneta</span>   <span>15</span> <span>115.889</span>   <span>7.726</span></div>
+                <div class="mdt-row" id="mdt-laestrella" onmouseenter="highlightMun('laestrella')" onmouseleave="clearHighlight()"><span>La Estrella</span><span>35</span> <span>85.779</span>    <span>2.451</span></div>
+                <div class="mdt-row" id="mdt-caldas"     onmouseenter="highlightMun('caldas')"     onmouseleave="clearHighlight()"><span>Caldas</span>     <span>196</span><span>92.817</span>    <span>474</span></div>
+                <div class="mdt-row mdt-total"><span>Total</span><span>1.229</span><span>4.389.672</span><span>3.572</span></div>
               </div>
             </details>
             <div class="plan-p" style="font-size:12px">El Valle de Aburrá tiene <strong>1.157 km²</strong> de extensión, con alturas de 1.300 a más de 2.500 msnm. Su geografía de valle estrecho rodeado de laderas empinadas lo hace especialmente expuesto a múltiples tipos de eventos.</div>
