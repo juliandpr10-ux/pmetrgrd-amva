@@ -957,6 +957,7 @@ function findAct(aid, oid, eid, pid, prid) {
 }
 
 function openModal(aid, oid, eid, pid, prid) {
+  const READ_ONLY = new URLSearchParams(window.location.search).get('modo') === 'lectura' || window.innerWidth < 768;
   if (READ_ONLY) return;
   const a = findAct(aid, oid, eid, pid, prid);
   if (!a) return;
@@ -996,6 +997,8 @@ function closeModal() {
 }
 
 document.getElementById('btn-save').addEventListener('click', () => {
+  const READ_ONLY = new URLSearchParams(window.location.search).get('modo') === 'lectura' || window.innerWidth < 768;
+  if (READ_ONLY) return;
   if (!editRef) return;
   const a = findAct(editRef.aid, editRef.oid, editRef.eid, editRef.pid, editRef.prid);
   if (!a) return;

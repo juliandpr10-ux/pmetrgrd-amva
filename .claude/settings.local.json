@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"\n$lines = Get-Content 'C:\\\\Users\\\\User\\\\OneDrive\\\\Desktop\\\\Con el plan.html' -Encoding UTF8\n$rawLine2 = $lines[1358]  # 0-indexed: line 1359 \\(OBJ1\\)\n$rawLine2.Length\n\")",
+      "Bash(powershell -Command \"$lines = Get-Content 'C:\\\\Users\\\\User\\\\OneDrive\\\\Desktop\\\\Con el plan.html' -Encoding UTF8; $lines[1358].Length\")",
+      "Bash(powershell -EncodedCommand \"JGxpbmVzID0gR2V0LUNvbnRlbnQgJ0M6XFVzZXJzXFVzZXJcT25lRHJpdmVcRGVza3RvcFxDb24gZWwgcGxhbi5odG1sJyAtRW5jb2RpbmcgVVRGODsgJGxpbmUgPSAkbGluZXNbMTM1OF07IFdyaXRlLU91dHB1dCAkbGluZS5MZW5ndGg=\")",
+      "Bash(powershell -NoProfile -NonInteractive -Command \"Get-Content 'C:\\\\Users\\\\User\\\\OneDrive\\\\Desktop\\\\Con el plan.html' -Encoding UTF8 | Measure-Object -Line\")",
+      "Bash(powershell -NoProfile -NonInteractive -Command \"Get-Content 'C:\\\\Users\\\\User\\\\OneDrive\\\\Desktop\\\\Con el plan.html' -Encoding UTF8 | Select-Object -Skip 1357 -First 8 | ForEach-Object { Write-Output \\($_.Length\\) }\")",
+      "Bash(powershell -NoProfile -NonInteractive -File \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\C--Users-User-PMGRD-Pagina\\\\extract_raw.ps1\")",
+      "Bash(powershell -NoProfile -NonInteractive -File \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\C--Users-User-PMGRD-Pagina\\\\split_raw.ps1\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\User\\\\PMGRD Pagina\\\\build.ps1\" 2>&1)",
+      "Bash(powershell -Command \"\n\\\\$enc = [System.Text.Encoding]::UTF8\n\\\\$f = [System.IO.File]::ReadAllText\\('C:\\\\Users\\\\User\\\\PMGRD Pagina\\\\js\\\\app.js', \\\\$enc\\)\n\\\\$lines = \\\\$f -split '\\\\r?\\\\n'\nWrite-Output \\('Total lines: ' + \\\\$lines.Count\\)\nfor \\(\\\\$i = \\(\\\\$lines.Count - 15\\); \\\\$i -lt \\\\$lines.Count; \\\\$i++\\) {\n  Write-Output \\('{0,4}: {1}' -f \\(\\\\$i+1\\), \\\\$lines[\\\\$i]\\)\n}\n\")",
+      "Bash(powershell -Command \"\nRemove-Item 'C:\\\\Users\\\\User\\\\PMGRD Pagina\\\\*.tmp' -Force\nRemove-Item 'C:\\\\Users\\\\User\\\\PMGRD Pagina\\\\*.ps1' -Force\nGet-ChildItem 'C:\\\\Users\\\\User\\\\PMGRD Pagina' -Recurse | Select-Object FullName, @{N='Size';E={if \\(\\\\$_.PSIsContainer\\) {'<dir>'} else {'{0:N0} bytes' -f \\\\$_.Length}}}\n\")",
+      "Bash(powershell -Command \"\n\\\\$enc = [System.Text.Encoding]::UTF8\n\\\\$f = [System.IO.File]::ReadAllText\\('C:\\\\Users\\\\User\\\\PMGRD Pagina\\\\js\\\\app.js', \\\\$enc\\)\n\\\\$fns = @\\('renderDashboard', 'renderDonut', 'renderArbol', 'renderKanban', 'openModal', 'exportToExcel', 'initFirebase', 'initMultiSelects', 'toggleMarco', 'showRiesgo', 'clearAllResps', 'saveToLocalStorage', 'loadFromLocalStorage', 'pushToFirebase', 'sc\\\\\\(', 'showToast'\\)\nforeach \\(\\\\$fn in \\\\$fns\\) {\n  \\\\$count = \\([regex]::Matches\\(\\\\$f, 'function ' + \\\\$fn\\)\\).Count\n  if \\(\\\\$count -eq 0\\) { Write-Output 'MISSING: ' + \\\\$fn }\n  else { Write-Output 'OK: ' + \\\\$fn }\n}\n\")"
+    ]
+  }
+}
