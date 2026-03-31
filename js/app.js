@@ -947,6 +947,7 @@ function findAct(aid, oid, eid, pid, prid) {
 }
 
 function openModal(aid, oid, eid, pid, prid) {
+  if (READ_ONLY) return;
   const a = findAct(aid, oid, eid, pid, prid);
   if (!a) return;
   editRef = {aid, oid, eid, pid, prid};

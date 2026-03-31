@@ -398,42 +398,43 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 
 @media (max-width: 767px) {
-  /* Topbar móvil */
+  /* Topbar móvil — solo pestañas, sin logo */
   .topbar {
-    height: auto; padding: 10px 14px; flex-wrap: wrap; gap: 6px;
+    height: auto; padding: 8px 12px;
+    justify-content: center;
     position: sticky; top: 0; z-index: 50;
   }
-  /* Fila 1: brand ocupa todo el ancho */
+  /* Ocultar bloque logo+título — ya aparece en el hero */
+  .brand { display: none !important; }
   .topbar > div:first-child {
     width: 100%; flex: none; display: flex; align-items: center;
-    justify-content: space-between;
+    justify-content: center; gap: 0;
   }
-  .brand-name { font-size: 13px; }
-  .brand-sub  { display: none; }
-  .brand img, .topbar-logo-img { height: 34px !important; width: 34px !important; }
-  /* Ocultar botones de descarga y edición en móvil — solo vista */
+  /* Ocultar botones de descarga y edición en móvil */
   .topbar-right { display: none !important; }
-  /* Fila 2: nav ocupa todo el ancho */
+  /* Nav: fila única centrada */
   .nav {
-    order: 3; width: 100%; justify-content: stretch;
+    order: 0; width: 100%; justify-content: center;
     background: rgba(0,0,0,.15); border-radius: var(--r-sm);
     padding: 4px; gap: 3px; overflow: hidden;
   }
   .nav-btn {
-    flex: 1; text-align: center; padding: 6px 2px; font-size: 11px;
+    flex: 1; text-align: center; padding: 7px 4px; font-size: 12px;
     border-radius: 5px; white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis; min-width: 0;
   }
 
   /* Main padding */
-  .main { padding: 12px; }
+  .main { padding: 12px 16px; }
 
-  /* KPI strip — 2 columnas en móvil */
+  /* KPI strip — 2 columnas centradas */
   .kpi-strip {
-    flex-wrap: wrap; padding: 12px 16px; gap: 8px; border-radius: var(--r-sm);
+    flex-wrap: wrap; justify-content: center;
+    padding: 12px 16px; gap: 8px; border-radius: var(--r-sm);
+    width: 100%; box-sizing: border-box;
   }
-  .kpi-card { flex: 0 0 calc(50% - 4px); padding: 4px 0; }
-  .kpi-num  { font-size: 24px; }
+  .kpi-card { flex: 0 0 calc(50% - 8px); padding: 6px 4px; text-align: center; }
+  .kpi-num  { font-size: 26px; }
   .kpi-lbl  { font-size: 10px; }
   .kpi-div  { display: none; }
 
@@ -445,10 +446,10 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   .dash-row { flex-direction: column; }
   .dash-panel { width: 100% !important; }
 
-  /* Donut más pequeño */
-  .donut-wrap { width: 200px; height: 200px; margin: 8px auto 6px; }
-  #donut-canvas { width: 200px !important; height: 200px !important; }
-  .donut-pct { font-size: 30px; }
+  /* Donut centrado */
+  .donut-wrap { width: 260px; height: 260px; max-width: 300px; margin: 8px auto 6px; }
+  #donut-canvas { width: 260px !important; height: 260px !important; max-width: 100%; }
+  .donut-pct { font-size: 32px; }
 
   /* Obj bars */
   .obj-bar-title { font-size: 11px; }
@@ -507,10 +508,13 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 
 /* ── MODO LECTURA (URL ?modo=lectura o clase .modo-lectura) ──────── */
-.modo-lectura .topbar-right { display: none !important; }
+.modo-lectura .topbar-right        { display: none !important; }
+.modo-lectura #modal-overlay       { display: none !important; }
+.modo-lectura .k-expand-btn,
+.modo-lectura .k-more-btn          { display: none !important; }
 .modo-lectura input,
 .modo-lectura select,
-.modo-lectura textarea { pointer-events: none; opacity: .85; }
+.modo-lectura textarea             { pointer-events: none; opacity: .85; }
 /* ─────────────────────────────────────────────────────────────────── */
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
