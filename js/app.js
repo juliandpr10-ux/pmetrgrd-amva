@@ -1,4 +1,25 @@
-﻿let S = JSON.parse(JSON.stringify(RAW));
+﻿// ── MODO LECTURA (parámetro URL o dispositivo móvil) ──────────────
+const _urlParams = new URLSearchParams(window.location.search);
+const _isMobile  = (navigator.userAgentData?.mobile === true) || (window.innerWidth < 768);
+const READ_ONLY  = _urlParams.get('modo') === 'lectura' || _isMobile;
+
+// Si es móvil y no tiene el parámetro, redirigir automáticamente
+if (_isMobile && _urlParams.get('modo') !== 'lectura') {
+  const _dest = new URL(window.location.href);
+  _dest.searchParams.set('modo', 'lectura');
+  window.location.replace(_dest.toString());
+}
+
+if (READ_ONLY) {
+  document.body.classList.add('modo-lectura');
+  // Etiquetas cortas en la barra de navegación
+  document.querySelectorAll('.nav-btn[data-short]').forEach(btn => {
+    btn.textContent = btn.dataset.short;
+  });
+}
+// ─────────────────────────────────────────────────────────────────
+
+let S = JSON.parse(JSON.stringify(RAW));
 let editRef = null;
 const exp = {};
 
@@ -1305,7 +1326,15 @@ function computeCRC32(data) {
 // ============================================
 //  INIT
 // ============================================
-initFirebase();
+if (READ_ONLY) {
+  // Modo lectura: cargar datos sin conectar a Firebase
+  initMultiSelects();
+  loadFromLocalStorage();
+  renderDashboard();
+  showSyncStatus('local');
+} else {
+  initFirebase();
+}
 
 
 // ============================================
