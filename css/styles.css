@@ -661,7 +661,12 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   align-items: stretch;
+  padding-top: 4px;
   margin-bottom: 24px;
+}
+#card-escenarios {
+  margin-top: 8px;
+  scroll-margin-top: 20px;
 }
 /* Legacy aliases — por si quedan referencias */
 .plan-main-grid, .plan-section-grid { display: contents; }
