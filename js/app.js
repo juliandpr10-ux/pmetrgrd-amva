@@ -12,10 +12,20 @@ if (_isMobile && _urlParams.get('modo') !== 'lectura') {
 
 if (READ_ONLY) {
   document.body.classList.add('modo-lectura');
+
   // Etiquetas cortas en la barra de navegación
   document.querySelectorAll('.nav-btn[data-short]').forEach(btn => {
     btn.textContent = btn.dataset.short;
   });
+
+  // Bloquear modales en fase de CAPTURA (antes que cualquier listener existente)
+  // .act-row = actividades en árbol, .k-card = tarjetas kanban
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.act-row') || e.target.closest('.k-card')) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }
+  }, true); // true = capture phase, se dispara ANTES que todos los demás listeners
 }
 // ─────────────────────────────────────────────────────────────────
 
