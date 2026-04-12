@@ -883,6 +883,7 @@ function renderArbol() {
             </button>`;
           }
           h += `</div>`;
+        });
         h += `</div>`;
       });
       h += `</div>`;
