@@ -1169,12 +1169,12 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .viz-card {
   background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.25);
-  border-radius: 12px; padding: 20px; margin-bottom: 20px; overflow: hidden;
-  border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin-bottom: 20px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 .viz-card-title {
-  font-size: 13px; font-weight: 700; color: var(--green-pri);
-  margin-bottom: 14px;
+  font-size: 14px; font-weight: 700; color: #66CC33;
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px;
 }
 .viz-row {
   display: flex; gap: 20px; align-items: stretch;

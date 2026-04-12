@@ -1902,358 +1902,376 @@ function renderTreemap(allActsData) {
   if (!container || typeof d3 === 'undefined') return;
   container.innerHTML = '';
 
-  const OBJ_BASE = { OBJ1:'#1B5E20', OBJ2:'#2E7D32', OBJ3:'#388E3C', OBJ4:'#4CAF50' };
+  const W = container.clientWidth || container.offsetWidth || 800;
+  const H = window.innerWidth < 768 ? 300 : 420;
+  container.style.height = H + 'px';
+
+  const OBJ_NAMES = ['Conocimiento del Riesgo','Reducción del Riesgo','Manejo de Desastres','Gobernanza'];
+  const OBJ_VARIANTS = [
+    ['#0f2e0f','#143d14','#194d19','#1a5c1a'],
+    ['#143d14','#1a5c1a','#1f6b22','#23762b'],
+    ['#1a5c1a','#1d6b2a','#227a30','#268736'],
+    ['#1d6b2a','#2a7a35','#2f8a3c','#339944']
+  ];
+  const OBJ_LABEL_COLORS = ['#81C784','#66BB6A','#4CAF50','#66CC33'];
 
   const treeData = {
     name: 'Plan',
-    children: S.map(obj => ({
+    children: S.map((obj, i) => ({
       name: obj.title,
       objId: obj.id,
+      objIdx: i,
+      objName: OBJ_NAMES[i] || obj.proceso,
       children: obj.estrategias.flatMap(e => e.programas).map(prog => {
         const progActs = allActsData.filter(x => x.p.id === prog.id);
         const pct = avgPct(progActs.map(x => x.a.pct));
+        const executed = progActs.filter(x => x.a.pct >= 100).length;
         return {
           name: prog.title.replace(/PROG \d+[\.\d-]*\. /, ''),
-          objId: obj.id,
-          value: prog.proyectos.length || 1,
+          objId: obj.id, objIdx: i,
+          objName: OBJ_NAMES[i] || obj.proceso,
+          value: Math.max(progActs.length, 1),
           actCount: progActs.length,
           projCount: prog.proyectos.length,
+          executedCount: executed,
           pct
         };
       })
     }))
   };
 
-  const W = container.offsetWidth || 800;
-  const H = Math.max(300, Math.min(380, W * 0.48));
-  container.style.height = H + 'px';
-
   const root = d3.hierarchy(treeData).sum(d => d.value).sort((a, b) => b.value - a.value);
-  d3.treemap().size([W, H]).paddingInner(2).paddingOuter(4).paddingTop(20)(root);
+  d3.treemap().size([W, H]).paddingInner(2).paddingOuter(3).paddingTop(22)(root);
 
   const svg = d3.select(container).append('svg')
-    .attr('width', W).attr('height', H)
-    .style('display', 'block');
+    .attr('width', W).attr('height', H).style('display', 'block');
 
-  // Escala de color por objetivo (claro → oscuro según posición)
-  function cellColor(d) {
-    const base = OBJ_BASE[d.data.objId] || '#339B33';
-    return base;
-  }
+  // Drop-shadow filter for text readability
+  const defs = svg.append('defs');
+  const filt = defs.append('filter').attr('id', 'tm-shadow')
+    .attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%');
+  filt.append('feDropShadow').attr('dx',0).attr('dy',1).attr('stdDeviation',1.5)
+    .attr('flood-color','#000').attr('flood-opacity',0.85);
 
-  const node = svg.selectAll('g').data(root.leaves()).enter().append('g')
+  // Objective group header labels
+  (root.children || []).forEach(og => {
+    svg.append('text')
+      .attr('x', og.x0 + 5).attr('y', og.y0 + 15)
+      .attr('fill', OBJ_LABEL_COLORS[og.data.objIdx] || '#66CC33')
+      .attr('font-size','10px').attr('font-weight','700')
+      .attr('font-family','DM Sans, sans-serif').attr('letter-spacing','1px')
+      .text((OBJ_NAMES[og.data.objIdx] || '').toUpperCase());
+  });
+
+  // Leaf nodes
+  const node = svg.selectAll('g.tm-leaf').data(root.leaves()).enter()
+    .append('g').attr('class','tm-leaf')
     .attr('transform', d => `translate(${d.x0},${d.y0})`);
 
   node.append('rect')
-    .attr('width', d => Math.max(0, d.x1 - d.x0))
+    .attr('width',  d => Math.max(0, d.x1 - d.x0))
     .attr('height', d => Math.max(0, d.y1 - d.y0))
-    .attr('fill', d => cellColor(d))
-    .attr('fill-opacity', (_, i) => 0.6 + (i % 4) * 0.1)
-    .attr('rx', 3)
-    .attr('stroke', '#0e1115')
-    .attr('stroke-width', 1);
+    .attr('fill', d => {
+      const v = OBJ_VARIANTS[d.data.objIdx] || OBJ_VARIANTS[0];
+      return v[((d.parent?.children || []).indexOf(d)) % v.length];
+    })
+    .attr('rx',3).attr('stroke','#0e1115').attr('stroke-width',1);
 
-  node.append('text')
-    .attr('x', 5).attr('y', 14)
-    .attr('fill', 'white')
-    .attr('font-size', d => (d.x1 - d.x0) > 100 ? '11px' : '9px')
-    .attr('font-family', 'DM Sans, sans-serif')
-    .text(d => {
-      const w = d.x1 - d.x0;
-      const h2 = d.y1 - d.y0;
-      if (w < 40 || h2 < 18) return '';
-      const maxChars = Math.floor(w / 7);
-      return d.data.name.length > maxChars ? d.data.name.substring(0, maxChars - 1) + '…' : d.data.name;
-    });
+  // Two-line centered text (no truncation on small rects)
+  node.each(function(d) {
+    const w = d.x1 - d.x0, h = d.y1 - d.y0;
+    if (w < 100 || h < 50) return;
+    const fs = (w > 150 && h > 80) ? 13 : 11;
+    const maxChars = Math.floor(w / (fs * 0.6));
+    const nm = d.data.name.length <= maxChars
+      ? d.data.name
+      : (fs === 13 ? d.data.name.substring(0, maxChars - 1) + '…' : '');
+    if (!nm) return;
+    const cx = w / 2, cy = h / 2;
+    const g = d3.select(this);
+    g.append('text')
+      .attr('x', cx).attr('y', cy - fs * 0.5)
+      .attr('text-anchor','middle').attr('fill','white')
+      .attr('font-size', fs + 'px').attr('font-family','DM Sans, sans-serif')
+      .attr('filter','url(#tm-shadow)').text(nm);
+    g.append('text')
+      .attr('x', cx).attr('y', cy + fs * 0.9)
+      .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.8)')
+      .attr('font-size', (fs - 2) + 'px').attr('font-family','DM Sans, sans-serif')
+      .attr('filter','url(#tm-shadow)')
+      .text(`${d.data.actCount} act · ${d.data.pct}%`);
+  });
 
-  node.append('text')
-    .attr('x', 5).attr('y', 28)
-    .attr('fill', 'rgba(255,255,255,0.75)')
-    .attr('font-size', '9px')
-    .attr('font-family', 'DM Sans, sans-serif')
-    .text(d => {
-      const w = d.x1 - d.x0;
-      const h2 = d.y1 - d.y0;
-      if (w < 60 || h2 < 32) return '';
-      return `${d.data.projCount} proy · ${d.data.pct}%`;
-    });
-
-  node.append('title').text(d =>
-    `${d.data.name}\n${d.data.projCount} proyecto(s) · ${d.data.actCount} actividades · ${d.data.pct}% avance`);
-
-  // Etiquetas de objetivo (cabeceras)
-  svg.selectAll('.obj-label').data(root.children || []).enter().append('text')
-    .attr('class', 'obj-label')
-    .attr('x', d => d.x0 + 4)
-    .attr('y', d => d.y0 + 14)
-    .attr('fill', 'white')
-    .attr('font-size', '10px')
-    .attr('font-weight', '700')
-    .attr('font-family', 'DM Sans, sans-serif')
-    .text(d => (d.data.name || '').replace('Mejorar el ','').replace('Fortalecer la Capacidad de ','').replace('Incrementar la ','').substring(0,28));
+  // Rich tooltip
+  let tip = document.getElementById('tm-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'tm-tooltip';
+    tip.style.cssText = 'position:fixed;pointer-events:none;background:#1a2a1a;border:1px solid #66CC33;border-radius:8px;padding:10px 14px;font-family:DM Sans,sans-serif;font-size:12px;display:none;z-index:9999;min-width:200px';
+    document.body.appendChild(tip);
+  }
+  node.on('mousemove', (event, d) => {
+    tip.style.display = 'block';
+    tip.style.left = Math.min(event.clientX + 14, window.innerWidth - 220) + 'px';
+    tip.style.top  = Math.min(event.clientY - 10, window.innerHeight - 160) + 'px';
+    tip.innerHTML  = `
+      <div style="font-weight:700;color:white;margin-bottom:4px;line-height:1.4">${d.data.name}</div>
+      <div style="color:#66CC33;margin-bottom:3px;font-size:11px">Objetivo: ${d.data.objName}</div>
+      <div style="color:#aaa;margin-bottom:6px;font-size:11px">Actividades: ${d.data.actCount} total · ${d.data.executedCount} completadas</div>
+      <div style="color:#66BB6A;margin-bottom:6px;font-size:11px">Avance: ${d.data.pct}%</div>
+      <div style="background:#2a2a2a;border-radius:3px;height:6px;width:120px;overflow:hidden">
+        <div style="background:#66CC33;height:100%;width:${Math.min(d.data.pct,100)}%;border-radius:3px"></div>
+      </div>`;
+  }).on('mouseleave', () => { tip.style.display = 'none'; });
 }
 
 // ============================================
 //  GRÁFICA B — GANTT / LÍNEA DE TIEMPO (Chart.js)
 // ============================================
-let _ganttChart = null;
 function renderGantt(allActsData) {
-  const canvas = document.getElementById('chart-gantt');
-  if (!canvas || typeof Chart === 'undefined') return;
+  const wrap = document.getElementById('chart-gantt-wrap');
+  if (!wrap || typeof d3 === 'undefined') return;
+  wrap.innerHTML = '';
+  d3.select('#gantt-tooltip').remove();
 
-  if (_ganttChart) { _ganttChart.destroy(); _ganttChart = null; }
+  const YEARS = [2024, 2025, 2026, 2027, 2028];
+  const START = new Date('2024-01-01');
+  const END   = new Date('2028-01-01');
+  const today = new Date();
+  const OBJ_NAMES = ['Conocimiento','Reducción','Respuesta','Gobernanza'];
 
-  const START = new Date('2024-01-01').getTime();
-  const END   = new Date('2027-12-31').getTime();
-  const today = Date.now();
-
-  const labels = [];
-  const data   = [];
-  const bgColors = [];
-
-  S.forEach(obj => {
+  const rows = S.map((obj, i) => {
     const acts = allActsData.filter(x => x.o.id === obj.id);
     const pct  = avgPct(acts.map(x => x.a.pct));
-    const label = (['Conocimiento','Reducción','Respuesta','Gobernanza'][S.indexOf(obj)] || obj.proceso || obj.id);
-    labels.push(label);
-    data.push([START, END]);
-    const col = pct <= 25 ? 'rgba(180,180,180,0.85)'
-              : pct <= 50 ? 'rgba(165,214,167,0.85)'
-              : pct <= 75 ? 'rgba(102,187,106,0.85)'
-              : 'rgba(46,125,50,0.85)';
-    bgColors.push(col);
+    return { name: OBJ_NAMES[i] || obj.proceso || obj.id, pct, actCount: acts.length };
   });
 
-  const todayPlugin = {
-    id: 'todayLine',
-    afterDraw(chart) {
-      if (today < START || today > END) return;
-      const { ctx, chartArea, scales } = chart;
-      const x = scales.x.getPixelForValue(today);
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x, chartArea.top);
-      ctx.lineTo(x, chartArea.bottom);
-      ctx.strokeStyle = '#FF5722';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 3]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = '#FF5722';
-      ctx.font = 'bold 10px DM Sans, sans-serif';
-      ctx.fillText('Hoy', x + 4, chartArea.top + 12);
-      ctx.restore();
-    }
-  };
+  const margin = { top: 28, right: 50, bottom: 20, left: 112 };
+  const W      = Math.max(wrap.clientWidth || wrap.offsetWidth || 700, 320);
+  const rowH   = 38;
+  const metaH  = 16;
+  const gap    = 14;
+  const rowSpacing = rowH + metaH + gap;
+  const H      = margin.top + rows.length * rowSpacing - gap + margin.bottom;
 
-  _ganttChart = new Chart(canvas, {
-    type: 'bar',
-    plugins: [todayPlugin],
-    data: {
-      labels,
-      datasets: [{
-        label: 'Período',
-        data,
-        backgroundColor: bgColors,
-        borderColor: bgColors.map(c => c.replace('0.85', '1')),
-        borderWidth: 1,
-        borderRadius: 4,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: {
-          label(ctx) {
-            const acts = allActsData.filter(x => x.o.id === S[ctx.dataIndex]?.id);
-            const pct = avgPct(acts.map(x => x.a.pct));
-            return ` Avance: ${pct}% · 2024–2027`;
-          }
-        }
-      }},
-      scales: {
-        x: {
-          type: 'linear',
-          min: START,
-          max: END,
-          ticks: {
-            color: 'rgba(255,255,255,0.6)',
-            font: { size: 10 },
-            callback: v => new Date(v).getFullYear()
-          },
-          grid: { color: 'rgba(255,255,255,0.07)' }
-        },
-        y: {
-          ticks: { color: 'rgba(255,255,255,0.8)', font: { size: 11 } },
-          grid: { display: false }
-        }
-      }
-    }
+  wrap.style.minHeight = H + 'px';
+
+  const svg = d3.select(wrap).append('svg')
+    .attr('width','100%').attr('height', H)
+    .attr('viewBox',`0 0 ${W} ${H}`);
+
+  const gW = W - margin.left - margin.right;
+  const gH = H - margin.top - margin.bottom;
+  const g  = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleTime().domain([START, END]).range([0, gW]);
+
+  // Year guide lines + labels
+  YEARS.forEach(yr => {
+    const x = xScale(new Date(`${yr}-01-01`));
+    g.append('line').attr('x1',x).attr('x2',x).attr('y1',0).attr('y2',gH)
+      .attr('stroke','rgba(255,255,255,0.07)').attr('stroke-width',1);
+    g.append('text').attr('x',x+3).attr('y',-10)
+      .attr('fill','rgba(255,255,255,0.3)').attr('font-size','10px')
+      .attr('font-family','DM Sans,sans-serif').text(yr);
   });
-  canvas.parentElement.style.height = '280px';
+
+  // "Hoy" line + pill
+  const todayX = xScale(today);
+  if (todayX >= 0 && todayX <= gW) {
+    g.append('line').attr('x1',todayX).attr('x2',todayX).attr('y1',0).attr('y2',gH)
+      .attr('stroke','#FF7043').attr('stroke-width',1.5).attr('stroke-dasharray','4,3');
+    const pillW = 34, pillH = 16;
+    const pg = svg.append('g').attr('transform',`translate(${margin.left+todayX-pillW/2},${margin.top-pillH-3})`);
+    pg.append('rect').attr('width',pillW).attr('height',pillH).attr('rx',8).attr('fill','#FF7043');
+    pg.append('text').attr('x',pillW/2).attr('y',11).attr('text-anchor','middle')
+      .attr('fill','white').attr('font-size','9px').attr('font-weight','700')
+      .attr('font-family','DM Sans,sans-serif').text('Hoy');
+  }
+
+  // Tooltip
+  const tooltip = d3.select(document.body).append('div').attr('id','gantt-tooltip')
+    .style('position','fixed').style('pointer-events','none')
+    .style('background','#1a2233').style('border','1px solid rgba(255,255,255,0.12)')
+    .style('border-radius','8px').style('padding','10px 14px')
+    .style('color','#e0e0e0').style('font-size','12px')
+    .style('font-family','DM Sans,sans-serif')
+    .style('box-shadow','0 4px 16px rgba(0,0,0,0.5)')
+    .style('opacity',0).style('z-index',9999);
+
+  // Rows
+  rows.forEach((row, i) => {
+    const y = i * rowSpacing;
+    const fillColor = row.pct >= 75 ? '#66CC33'
+                    : row.pct >= 50 ? '#A5D6A7'
+                    : row.pct >= 25 ? '#FFB74D' : '#E57373';
+    const fillW = Math.max(0, gW * row.pct / 100);
+
+    // Row label
+    g.append('text').attr('x',-8).attr('y', y + rowH/2 + 4)
+      .attr('text-anchor','end').attr('fill','rgba(255,255,255,0.8)')
+      .attr('font-size','11px').attr('font-family','DM Sans,sans-serif')
+      .text(row.name);
+
+    // Background track
+    g.append('rect').attr('x',0).attr('y',y).attr('width',gW).attr('height',rowH)
+      .attr('rx',6).attr('fill','rgba(255,255,255,0.05)');
+
+    // Progress fill
+    if (fillW > 0) {
+      g.append('rect').attr('x',0).attr('y',y).attr('width',fillW).attr('height',rowH)
+        .attr('rx',6).attr('fill',fillColor).attr('opacity',0.85)
+        .on('mousemove',(event)=>{
+          tooltip.style('opacity',1)
+            .style('left',(event.clientX+14)+'px').style('top',(event.clientY-50)+'px')
+            .html(`<strong style="color:${fillColor}">${row.name}</strong><br>Avance: <strong>${row.pct}%</strong><br>Actividades: ${row.actCount}<br>Período: 2024–2027`);
+        })
+        .on('mouseleave',()=>tooltip.style('opacity',0));
+    }
+
+    // % label
+    if (fillW > 44) {
+      g.append('text').attr('x',fillW-8).attr('y',y+rowH/2+4)
+        .attr('text-anchor','end').attr('fill','rgba(0,0,0,0.75)')
+        .attr('font-size','11px').attr('font-weight','700')
+        .attr('font-family','DM Sans,sans-serif').text(`${row.pct}%`);
+    } else {
+      g.append('text').attr('x',fillW+8).attr('y',y+rowH/2+4)
+        .attr('text-anchor','start').attr('fill','rgba(255,255,255,0.45)')
+        .attr('font-size','11px').attr('font-family','DM Sans,sans-serif').text(`${row.pct}%`);
+    }
+
+    // Meta line
+    g.append('text').attr('x',4).attr('y',y+rowH+13)
+      .attr('fill','rgba(255,255,255,0.35)').attr('font-size','10px')
+      .attr('font-family','DM Sans,sans-serif').text(`${row.actCount} actividades`);
+  });
 }
 
 // ============================================
-//  GRÁFICA C — SUNBURST (D3.js)
+//  GRÁFICA C — ESTADO DE ACTIVIDADES (barras apiladas D3)
 // ============================================
 function renderSunburst(allActsData) {
   const container = document.getElementById('chart-sunburst');
   if (!container || typeof d3 === 'undefined') return;
   container.innerHTML = '';
+  d3.select('#sb-tooltip').remove();
 
-  const W = container.clientWidth || 380;
-  const H = Math.max(300, Math.min(W, 500));
-  const radius = Math.min(W, H) / 2 - 4;
+  const OBJ_NAMES  = ['Conocimiento','Reducción','Respuesta','Gobernanza'];
+  const COL_DONE   = '#66CC33';
+  const COL_INPROG = '#FFB74D';
+  const COL_NONE   = 'rgba(255,255,255,0.10)';
 
-  // Construir jerarquía
-  const data = {
-    name: 'Plan Metropolitano',
-    type: 'root',
-    children: S.map((obj, i) => {
-      const progs = obj.estrategias.flatMap(e => e.programas);
-      const objActs = allActsData.filter(x => x.o.id === obj.id);
-      const objAvg = avgPct(objActs.map(x => x.a.pct));
-      return {
-        name: ['Conocimiento','Reducción','Respuesta','Gobernanza'][i] || obj.proceso,
-        type: 'obj', objId: obj.id, avg: objAvg,
-        children: progs.map(prog => {
-          const progActs = allActsData.filter(x => x.p.id === prog.id);
-          const progAvg = avgPct(progActs.map(x => x.a.pct));
-          const shortN = prog.title.replace(/PROG \d+[\.\d-]*\. /, '').substring(0, 28);
-          return {
-            name: shortN, type: 'prog', avg: progAvg, count: prog.proyectos.length,
-            value: prog.proyectos.length || 1
-          };
-        })
-      };
-    })
-  };
-
-  const root = d3.hierarchy(data).sum(d => d.value || 0).sort((a, b) => b.value - a.value);
-  d3.partition().size([2 * Math.PI, root.height + 1])(root);
-  root.each(d => d.current = d);
-
-  const arc = d3.arc()
-    .startAngle(d => d.x0)
-    .endAngle(d => d.x1)
-    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-    .padRadius(radius * 1.5)
-    .innerRadius(d => d.y0 * radius)
-    .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
-
-  // Colores
-  const OBJ_SB = ['#339B33','#2E7D32','#e6a817','#1B5E20'];
-  function sbColor(d) {
-    if (d.depth === 0) return '#1B5E20';
-    if (d.depth === 1) { const i = d.parent.children.indexOf(d); return OBJ_SB[i % 4]; }
-    if (d.depth === 2) { const i = d.parent.parent.children.indexOf(d.parent); return OBJ_SB[i % 4] + 'CC'; }
-    return '#A5D6A7';
-  }
-
-  // Back button div
-  const backDiv = document.createElement('div');
-  backDiv.style.cssText = 'min-height:24px;margin-bottom:4px;text-align:center';
-  const backBtn = document.createElement('button');
-  backBtn.className = 'sunburst-back-btn';
-  backBtn.innerHTML = '← Volver';
-  backBtn.style.display = 'none';
-  backDiv.appendChild(backBtn);
-  container.appendChild(backDiv);
-
-  const svg = d3.select(container).append('svg')
-    .attr('viewBox', `${-W/2} ${-H/2} ${W} ${H}`)
-    .attr('width', W).attr('height', H)
-    .style('display', 'block').style('margin', '0 auto');
-
-  const g = svg.append('g');
-
-  const path = g.append('g').selectAll('path')
-    .data(root.descendants().slice(1))
-    .join('path')
-    .attr('fill', d => sbColor(d))
-    .attr('fill-opacity', d => arcVis(d.current) ? (d.children ? 0.85 : 0.5) : 0)
-    .attr('pointer-events', d => arcVis(d.current) ? 'auto' : 'none')
-    .attr('d', d => arc(d.current))
-    .attr('stroke', '#0e1115').attr('stroke-width', 0.5);
-
-  path.filter(d => d.children)
-    .style('cursor', 'pointer')
-    .on('click', clicked);
-
-  path.append('title').text(d => {
-    const parts = d.ancestors().map(x => x.data.name).reverse().join(' › ');
-    const info = d.data.avg !== undefined ? `\n${d.data.avg}% avance` : '';
-    const cnt  = d.data.count !== undefined ? `\n${d.data.count} proyecto(s)` : '';
-    return parts + info + cnt;
+  const rows = S.map((obj, i) => {
+    const acts = allActsData.filter(x => x.o.id === obj.id);
+    const total = acts.length || 1;
+    const done     = acts.filter(x => x.a.pct >= 100).length;
+    const inProg   = acts.filter(x => x.a.pct > 0 && x.a.pct < 100).length;
+    const notStart = acts.filter(x => !x.a.pct || x.a.pct <= 0).length;
+    return {
+      name: OBJ_NAMES[i] || obj.proceso || obj.id,
+      total: acts.length, done, inProg, notStart,
+      doneP: done / total, inProgP: inProg / total, notP: notStart / total
+    };
   });
 
-  const label = g.append('g').attr('pointer-events','none')
-    .attr('text-anchor','middle').style('user-select','none')
-    .selectAll('text').data(root.descendants().slice(1)).join('text')
-    .attr('dy', '0.35em')
-    .attr('fill-opacity', d => +lblVis(d.current))
-    .attr('transform', d => lblTransform(d.current))
-    .text(d => d.data.name.substring(0, 12))
-    .attr('fill', 'white').attr('font-size', '8px')
-    .attr('font-family', 'DM Sans, sans-serif');
+  const margin = { top: 12, right: 36, bottom: 52, left: 112 };
+  const W      = Math.max(container.clientWidth || container.offsetWidth || 700, 320);
+  const barH   = 32;
+  const gap    = 18;
+  const rowSpacing = barH + gap;
+  const H      = margin.top + rows.length * rowSpacing - gap + margin.bottom;
 
-  // Círculo central — click vuelve a raíz
-  const centerCircle = svg.append('circle')
-    .datum(root)
-    .attr('r', radius * 0.3)
-    .attr('fill', '#1B5E20')
-    .attr('opacity', 0.9)
-    .attr('cursor', 'pointer')
-    .on('click', clicked);
+  container.style.minHeight = H + 'px';
 
-  svg.append('text').attr('text-anchor','middle').attr('dy','0.35em')
-    .attr('fill','white').attr('font-size','9px').attr('font-family','DM Sans, sans-serif')
-    .attr('pointer-events','none').text('Plan');
+  const svg = d3.select(container).append('svg')
+    .attr('width','100%').attr('height',H)
+    .attr('viewBox',`0 0 ${W} ${H}`);
 
-  let focusStack = [];
-  let _inBack = false;
+  const gW = W - margin.left - margin.right;
+  const g  = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
 
-  function clicked(event, p) {
-    if (!p || !p.children) return;
-    if (!_inBack) focusStack.push(p);
-    backBtn.style.display = focusStack.length > 0 ? '' : 'none';
-    p.parent && centerCircle.datum(p.parent);
+  // Tooltip
+  const tooltip = d3.select(document.body).append('div').attr('id','sb-tooltip')
+    .style('position','fixed').style('pointer-events','none')
+    .style('background','#1a2233').style('border','1px solid rgba(255,255,255,0.12)')
+    .style('border-radius','8px').style('padding','10px 14px')
+    .style('color','#e0e0e0').style('font-size','12px')
+    .style('font-family','DM Sans,sans-serif')
+    .style('box-shadow','0 4px 16px rgba(0,0,0,0.5)')
+    .style('opacity',0).style('z-index',9999);
 
-    root.each(d => d.target = {
-      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      y0: Math.max(0, d.y0 - p.depth),
-      y1: Math.max(0, d.y1 - p.depth)
-    });
+  rows.forEach((row, i) => {
+    const y = i * rowSpacing;
 
-    const t = svg.transition().duration(500);
-    path.transition(t)
-      .tween('data', d => { const i = d3.interpolate(d.current, d.target); return t2 => d.current = i(t2); })
-      .attr('fill-opacity', d => arcVis(d.target) ? (d.children ? 0.85 : 0.5) : 0)
-      .attr('pointer-events', d => arcVis(d.target) ? 'auto' : 'none')
-      .attrTween('d', d => () => arc(d.current));
-    label.transition(t)
-      .attr('fill-opacity', d => +lblVis(d.target))
-      .attrTween('transform', d => () => lblTransform(d.current));
-  }
+    // Label
+    g.append('text').attr('x',-8).attr('y',y+barH/2+4)
+      .attr('text-anchor','end').attr('fill','rgba(255,255,255,0.8)')
+      .attr('font-size','11px').attr('font-family','DM Sans,sans-serif')
+      .text(row.name);
 
-  backBtn.onclick = () => {
-    focusStack.pop();
-    const prev = focusStack.length > 0 ? focusStack[focusStack.length - 1] : root;
-    if (focusStack.length === 0) backBtn.style.display = 'none';
-    _inBack = true;
-    clicked(null, prev);
-    _inBack = false;
-  };
+    // ClipPath for rounded edges on stacked segments
+    const clipId = `sb-clip-${i}`;
+    svg.append('defs').append('clipPath').attr('id',clipId)
+      .append('rect')
+        .attr('x', margin.left).attr('y', margin.top + y)
+        .attr('width', gW).attr('height', barH).attr('rx', barH/2);
 
-  function arcVis(d) { return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0; }
-  function lblVis(d) { return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03; }
-  function lblTransform(d) {
-    const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-    const y = (d.y0 + d.y1) / 2 * radius;
-    return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-  }
+    const barG = g.append('g').attr('transform',`translate(0,${y})`)
+      .attr('clip-path',`url(#${clipId})`);
+
+    // Background (not started)
+    barG.append('rect').attr('width',gW).attr('height',barH).attr('fill',COL_NONE);
+
+    // In progress layer (done + inProg width)
+    const inProgW = gW * (row.doneP + row.inProgP);
+    if (inProgW > 0) {
+      barG.append('rect').attr('width',inProgW).attr('height',barH)
+        .attr('fill',COL_INPROG).attr('opacity',0.85);
+    }
+
+    // Done layer
+    const doneW = gW * row.doneP;
+    if (doneW > 0) {
+      barG.append('rect').attr('width',doneW).attr('height',barH)
+        .attr('fill',COL_DONE).attr('opacity',0.9);
+    }
+
+    // Hover area (outside clip so full rounded rect)
+    g.append('rect').attr('x',0).attr('y',y).attr('width',gW).attr('height',barH)
+      .attr('rx',barH/2).attr('fill','transparent')
+      .on('mousemove',(event)=>{
+        tooltip.style('opacity',1)
+          .style('left',(event.clientX+14)+'px').style('top',(event.clientY-70)+'px')
+          .html(`<strong style="color:${COL_DONE}">${row.name}</strong><br>
+Total: ${row.total} actividades<br>
+<span style="color:${COL_DONE}">■ Completadas: ${row.done}</span><br>
+<span style="color:${COL_INPROG}">■ En progreso: ${row.inProg}</span><br>
+<span style="color:rgba(255,255,255,0.45)">■ Sin iniciar: ${row.notStart}</span>`);
+      })
+      .on('mouseleave',()=>tooltip.style('opacity',0));
+
+    // Count label at right
+    g.append('text').attr('x',gW+6).attr('y',y+barH/2+4)
+      .attr('fill','rgba(255,255,255,0.4)').attr('font-size','10px')
+      .attr('font-family','DM Sans,sans-serif').text(row.total);
+  });
+
+  // Legend
+  const legendY = rows.length * rowSpacing + 8;
+  const items = [
+    { color: COL_DONE,   label: 'Completada' },
+    { color: COL_INPROG, label: 'En progreso' },
+    { color: 'rgba(255,255,255,0.3)', label: 'Sin iniciar' }
+  ];
+  const step = gW / 3;
+  items.forEach((item, idx) => {
+    const lx = idx * step;
+    const lg = g.append('g').attr('transform',`translate(${lx},${legendY})`);
+    lg.append('rect').attr('width',12).attr('height',12).attr('rx',3).attr('fill',item.color);
+    lg.append('text').attr('x',17).attr('y',10)
+      .attr('fill','rgba(255,255,255,0.55)').attr('font-size','11px')
+      .attr('font-family','DM Sans,sans-serif').text(item.label);
+  });
+
 }
