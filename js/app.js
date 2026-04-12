@@ -34,8 +34,8 @@ let S = JSON.parse(JSON.stringify(RAW));
 let editRef = null;
 const exp = {};
 
-// ── Helper: proyecto activo (no removido) ─────────────────────────
-function proyectoActivo(p) { return !p.removido; }
+// ── Helper: actividad activa (no removida) ────────────────────────
+function actividadActiva(a) { return !a.removido; }
 
 // ── Mapa Valle de Aburrá — datos DANE 2023 (proyecciones) ────────
 const MUN_DATA = {
@@ -124,8 +124,8 @@ function loadFromLocalStorage() {
 function allActs() {
   const r = [];
   S.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
-    p.proyectos.filter(proyectoActivo).forEach(pr =>
-      pr.actividades.forEach(a => r.push({a,pr,p,e,o}))))));
+    p.proyectos.forEach(pr =>
+      pr.actividades.filter(actividadActiva).forEach(a => r.push({a,pr,p,e,o}))))));
   return r;
 }
 function avgPct(arr) { return arr.length ? Math.round(arr.reduce((s,x) => s + Math.min(x,100), 0) / arr.length) : 0; }
@@ -265,11 +265,16 @@ function renderDashboard() {
   renderObjCards(all);
   renderProcCards(all);
   populateFilters(all);
-  // Nuevas visualizaciones
+  // Chart.js dark defaults
+  if (typeof Chart !== 'undefined') {
+    Chart.defaults.color = '#CCCCCC';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+  }
+  // Visualizaciones
   renderTreemap(all);
   renderGantt(all);
   renderSunburst(all);
-  renderProyectosRemovidos();
+  updateLandingCounter();
 }
 
 // ── Animated Donut Chart ──────────────────────────────────────────
@@ -832,19 +837,15 @@ function renderArbol() {
           <span class="chev ${pp2?'open':''}">▶</span>
         </button>
         <div id="${pid}" class="tree-children ${pp2?'':'hidden'}">`;
-        p.proyectos.filter(proyectoActivo).forEach(pr => {
+        p.proyectos.forEach(pr => {
           const pra = pa.filter(x => x.pr.id === pr.id);
           if (!pra.length) return;
           const prid = 'n_' + o.id + '_' + e.id + '_' + p.id + '_' + pr.id;
           const prp = exp[prid] !== false;
-          const nuevoB = (pr.esNuevo || false) ? '<span class="badge-nuevo">Nuevo</span> ' : '';
           h += `<div class="tree-proy-row">
             <button class="tree-proy-btn" data-toggle="${prid}" style="flex:1">
-              <span>${nuevoB}<strong style="font-weight:600">${pr.id}</strong> — ${pr.title}</span>
+              <span><strong style="font-weight:600">${pr.id}</strong> — ${pr.title}</span>
               <span class="chev ${prp?'open':''}">▶</span>
-            </button>
-            <button class="tree-proy-detail-btn" data-prid="${pr.id}" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}" title="Ver/editar detalle del proyecto">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
             </button>
           </div>
           <div id="${prid}" class="tree-children ${prp?'':'hidden'}">
@@ -859,8 +860,9 @@ function renderArbol() {
           pra.forEach(({a, o:ao, e:ae, p:ap2, pr:apr}) => {
             const pct = Math.min(a.pct, 200);
             const color = sc(pct);
+            const nuevaBadge = a.esNueva ? '<span class="badge-nuevo">Nueva</span> ' : '';
             h += `<tr class="act-row" data-act="${a.id}" data-o="${ao.id}" data-e="${ae.id}" data-p="${ap2.id}" data-pr="${apr.id}">
-              <td style="max-width:320px;white-space:normal;line-height:1.4">${a.title}</td>
+              <td style="max-width:320px;white-space:normal;line-height:1.4">${nuevaBadge}${a.title}</td>
               <td style="font-family:'DM Mono',monospace;font-size:11px">${a.meta || '—'}</td>
               <td style="font-family:'DM Mono',monospace;font-size:11px">${a.ejecutado || 0}</td>
               <td>
@@ -872,15 +874,15 @@ function renderArbol() {
               <td style="font-size:11px;color:var(--text3)">${a.responsable || '—'}</td>
             </tr>`;
           });
-          h += `</tbody></table></div></div>`;
-        });
-        // Botón agregar proyecto (solo modo editable)
-        if (!READ_ONLY) {
-          h += `<button class="btn-agregar-proyecto" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Agregar proyecto
-          </button>`;
-        }
+          h += `</tbody></table></div>`;
+          // Botón agregar actividad (solo modo editable)
+          if (!READ_ONLY) {
+            h += `<button class="btn-agregar-actividad" data-prid="${pr.id}" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Agregar actividad
+            </button>`;
+          }
+          h += `</div>`;
         h += `</div>`;
       });
       h += `</div>`;
@@ -890,16 +892,14 @@ function renderArbol() {
   h += '</div>';
   const root = document.getElementById('tree-root');
   root.innerHTML = h;
-  renderProyectosRemovidos();
+  renderActividadesRemovidas();
 }
 
 document.getElementById('tree-root').addEventListener('click', e => {
   const btn = e.target.closest('[data-toggle]');
   if (btn) { toggle(btn.dataset.toggle); return; }
-  const detailBtn = e.target.closest('.tree-proy-detail-btn');
-  if (detailBtn) { openProjectModal(detailBtn.dataset.prid, detailBtn.dataset.pid, detailBtn.dataset.eid, detailBtn.dataset.oid); return; }
-  const addBtn = e.target.closest('.btn-agregar-proyecto');
-  if (addBtn) { openAddProjectModal(addBtn.dataset.pid, addBtn.dataset.eid, addBtn.dataset.oid); return; }
+  const addActBtn = e.target.closest('.btn-agregar-actividad');
+  if (addActBtn) { openAddActivityModal(addActBtn.dataset.prid, addActBtn.dataset.pid, addActBtn.dataset.eid, addActBtn.dataset.oid); return; }
   const row = e.target.closest('.act-row');
   if (row) openModal(row.dataset.act, row.dataset.o, row.dataset.e, row.dataset.p, row.dataset.pr);
 });
@@ -937,7 +937,7 @@ function renderKanban() {
   });
   const mkCard = (col) => ({a, o, e, p, pr}) =>
     `<div class="k-card" data-act="${a.id}" data-o="${o.id}" data-e="${e.id}" data-p="${p.id}" data-pr="${pr.id}">
-      <div class="k-card-title">${(pr.esNuevo||false)?'<span class="badge-nuevo">Nuevo</span> ':''}${a.title}</div>
+      <div class="k-card-title">${a.esNueva ? '<span class="badge-nuevo">Nueva</span> ' : ''}${a.title}</div>
       <div class="k-card-foot">
         <span class="k-tag" style="background:${OBJ_COL[o.id]}18;color:${OBJ_COL[o.id]}">${o.proceso}</span>
         <span style="font-size:10px;color:var(--text3)">${a.responsable || '—'}</span>
@@ -995,7 +995,9 @@ function openModal(aid, oid, eid, pid, prid) {
   document.getElementById('m-meta').value = a.meta || 0;
   document.getElementById('m-ejec').value = a.ejecutado || 0;
   document.getElementById('m-desc').value = a.descripcion || '';
-  document.getElementById('m-resp').value = a.responsable || '';
+  const respArray = a.responsables || (a.responsable && a.responsable.trim() ? [a.responsable.trim()] : []);
+  renderChips('m-resp-chips', respArray, false);
+  document.getElementById('m-resp-input').value = '';
   document.getElementById('m-plazo').value = a.plazo || 'ND';
   document.getElementById('m-notas').value = a.notas || '';
   updatePctPreview();
@@ -1036,7 +1038,9 @@ document.getElementById('btn-save').addEventListener('click', () => {
   a.ejecutado = ejec;
   a.pct = meta > 0 ? Math.round(ejec / meta * 1000) / 10 : (ejec > 0 ? 100 : 0);
   a.descripcion = document.getElementById('m-desc').value;
-  a.responsable = document.getElementById('m-resp').value;
+  const responsables = [...(_chipsData['m-resp-chips'] || [])];
+  a.responsables = responsables;
+  a.responsable = responsables.join(', ') || '';
   a.plazo = document.getElementById('m-plazo').value;
   a.notas = document.getElementById('m-notas').value;
   closeModal();
@@ -1047,6 +1051,22 @@ document.getElementById('btn-save').addEventListener('click', () => {
   saveToLocalStorage();
   pushToFirebase();
   showToast('✓ Guardado y sincronizado con el equipo');
+});
+
+document.getElementById('btn-remove-act').addEventListener('click', () => {
+  if (!editRef) return;
+  const a = findAct(editRef.aid, editRef.oid, editRef.eid, editRef.pid, editRef.prid);
+  if (!a) return;
+  document.getElementById('modal-confirmar-act-msg').textContent =
+    `¿Remover la actividad "${a.title}" del plan activo?`;
+  closeModal();
+  document.getElementById('modal-confirmar-remover-act').classList.add('open');
+  // guardar ref para cuando se confirme
+  document.getElementById('modal-confirmar-remover-act').dataset.aid  = editRef.aid;
+  document.getElementById('modal-confirmar-remover-act').dataset.oid  = editRef.oid;
+  document.getElementById('modal-confirmar-remover-act').dataset.eid  = editRef.eid;
+  document.getElementById('modal-confirmar-remover-act').dataset.pid  = editRef.pid;
+  document.getElementById('modal-confirmar-remover-act').dataset.prid = editRef.prid;
 });
 
 // ============================================
@@ -1078,8 +1098,9 @@ function exportToExcel() {
           est.programas.forEach(prog => {
             rows.push([prog.title, '', '', '', '', '', '', '', '', '']);
             rows.push(['Nro', 'PROYECTO', 'ACTIVIDAD', 'INDICADOR', 'META', 'EJECUTADO', '% EJECUCION', 'DESCRIPCION', 'RESPONSABLE', 'NOTAS']);
-            prog.proyectos.filter(proyectoActivo).forEach(proy => {
-              proy.actividades.forEach((act, idx) => {
+            prog.proyectos.forEach(proy => {
+              const actsActivas = proy.actividades.filter(actividadActiva);
+              actsActivas.forEach((act, idx) => {
                 rows.push([
                   idx === 0 ? proy.id : '',
                   idx === 0 ? proy.title : '',
@@ -1089,7 +1110,7 @@ function exportToExcel() {
                   act.ejecutado != null ? act.ejecutado : 0,
                   act.pct != null ? act.pct : 0,
                   act.descripcion || '',
-                  act.responsable || '',
+                  act.responsables ? act.responsables.join(', ') : (act.responsable || ''),
                   act.notas || ''
                 ]);
               });
@@ -1629,54 +1650,8 @@ function clearAllResps(id) {
 }
 
 // ============================================
-//  PROYECTO — HELPER DE BÚSQUEDA
+//  CHIPS — UTILIDADES GENÉRICAS
 // ============================================
-function findProject(prid, pid, eid, oid) {
-  const o = S.find(x => x.id === oid);
-  const e = o?.estrategias.find(x => x.id === eid);
-  const p = e?.programas.find(x => x.id === pid);
-  return p?.proyectos.find(x => x.id === prid);
-}
-
-// ============================================
-//  PROYECTO — MODAL DE DETALLE
-// ============================================
-let projectEditRef = null;
-
-function openProjectModal(prid, pid, eid, oid) {
-  const pr = findProject(prid, pid, eid, oid);
-  if (!pr) return;
-  projectEditRef = { prid, pid, eid, oid };
-
-  document.getElementById('mp-title-display').textContent = pr.title;
-  const nuevoB = document.getElementById('mp-nuevo-badge');
-  nuevoB.style.display = (pr.esNuevo || false) ? '' : 'none';
-
-  document.getElementById('mp-meta-ind').value = pr.meta || '';
-  document.getElementById('mp-fecha-inicio').value = pr.fechaInicio || '';
-  document.getElementById('mp-fecha-fin').value = pr.fechaFin || '';
-  document.getElementById('mp-descripcion').value = pr.descripcion || '';
-
-  // Chips de responsables
-  const isRO = READ_ONLY;
-  renderChips('mp-chips-container', pr.responsables || [], isRO);
-  const inputRow = document.getElementById('mp-chip-input-row');
-  if (inputRow) inputRow.style.display = isRO ? 'none' : '';
-  if (!isRO) document.getElementById('mp-resp-input').value = '';
-
-  // Acciones según modo
-  document.getElementById('mp-actions-edit').style.display = isRO ? 'none' : '';
-  document.getElementById('mp-actions-readonly').style.display = isRO ? '' : 'none';
-
-  document.getElementById('modal-proyecto').classList.add('open');
-}
-
-function closeProjectModal() {
-  document.getElementById('modal-proyecto').classList.remove('open');
-  projectEditRef = null;
-}
-
-// Chips genérico — usado en proyecto modal y add-project
 let _chipsData = {};
 function renderChips(containerId, chips, readOnly) {
   _chipsData[containerId] = [...chips];
@@ -1714,293 +1689,209 @@ document.addEventListener('click', e => {
   renderChips(cont, _chipsData[cont], false);
 });
 
-// Listener agregar chip en modal de proyecto
-document.getElementById('mp-resp-add').addEventListener('click', () => {
-  const inp = document.getElementById('mp-resp-input');
-  if (addChip('mp-chips-container', inp.value)) inp.value = '';
+// Chips del modal de actividad
+document.getElementById('m-resp-add').addEventListener('click', () => {
+  const inp = document.getElementById('m-resp-input');
+  if (addChip('m-resp-chips', inp.value)) inp.value = '';
   inp.focus();
 });
-document.getElementById('mp-resp-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('mp-resp-add').click(); }
-});
-
-// Guardar proyecto modal
-document.getElementById('mp-btn-guardar').addEventListener('click', () => {
-  if (!projectEditRef) return;
-  const pr = findProject(projectEditRef.prid, projectEditRef.pid, projectEditRef.eid, projectEditRef.oid);
-  if (!pr) return;
-  pr.responsables = [...(_chipsData['mp-chips-container'] || [])];
-  pr.meta = document.getElementById('mp-meta-ind').value.trim();
-  pr.fechaInicio = document.getElementById('mp-fecha-inicio').value;
-  pr.fechaFin = document.getElementById('mp-fecha-fin').value;
-  pr.descripcion = document.getElementById('mp-descripcion').value.trim();
-  closeProjectModal();
-  pushToFirebase();
-  showToast('✓ Proyecto actualizado y sincronizado');
-});
-
-document.getElementById('mp-btn-cancelar').addEventListener('click', closeProjectModal);
-document.getElementById('mp-btn-cerrar-ro').addEventListener('click', closeProjectModal);
-document.getElementById('modal-proyecto').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-proyecto')) closeProjectModal();
+document.getElementById('m-resp-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('m-resp-add').click(); }
 });
 
 // ============================================
-//  REMOVER PROYECTO
+//  REMOVER ACTIVIDAD — CONFIRMACIÓN
 // ============================================
-let _removeRef = null;
-
-document.getElementById('mp-btn-remover').addEventListener('click', () => {
-  if (!projectEditRef) return;
-  const pr = findProject(projectEditRef.prid, projectEditRef.pid, projectEditRef.eid, projectEditRef.oid);
-  if (!pr) return;
-  _removeRef = { ...projectEditRef };
-  document.getElementById('modal-confirmar-msg').textContent =
-    `¿Remover el proyecto "${pr.title}" del plan activo?`;
-  closeProjectModal();
-  document.getElementById('modal-confirmar-remover').classList.add('open');
+document.getElementById('modal-act-confirmar-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-confirmar-remover-act').classList.remove('open');
+});
+document.getElementById('modal-confirmar-remover-act').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-confirmar-remover-act'))
+    document.getElementById('modal-confirmar-remover-act').classList.remove('open');
 });
 
-document.getElementById('modal-confirmar-cancelar').addEventListener('click', () => {
-  document.getElementById('modal-confirmar-remover').classList.remove('open');
-  _removeRef = null;
-});
-document.getElementById('modal-confirmar-remover').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-confirmar-remover')) {
-    document.getElementById('modal-confirmar-remover').classList.remove('open');
-    _removeRef = null;
-  }
-});
-
-document.getElementById('modal-confirmar-ok').addEventListener('click', () => {
-  if (!_removeRef) return;
-  const pr = findProject(_removeRef.prid, _removeRef.pid, _removeRef.eid, _removeRef.oid);
-  if (!pr) return;
-  pr.removido = true;
-  pr.fechaRemocion = new Date().toISOString();
-  document.getElementById('modal-confirmar-remover').classList.remove('open');
-  _removeRef = null;
+document.getElementById('modal-act-confirmar-ok').addEventListener('click', () => {
+  const modal = document.getElementById('modal-confirmar-remover-act');
+  const {aid, oid, eid, pid, prid} = modal.dataset;
+  const a = findAct(aid, oid, eid, pid, prid);
+  if (!a) return;
+  a.removido = true;
+  a.fechaRemocion = new Date().toISOString();
+  modal.classList.remove('open');
   const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
   renderDashboard();
   if (currentView === 'arbol') renderArbol();
   if (currentView === 'kanban') renderKanban();
   pushToFirebase();
-  showToast('Proyecto removido del plan activo');
+  showToast('Actividad removida del plan activo');
 });
 
-function restaurarProyecto(prid, pid, eid, oid) {
-  const pr = findProject(prid, pid, eid, oid);
-  if (!pr) return;
-  pr.removido = false;
-  delete pr.fechaRemocion;
+function restoreActivity(aid, oid, eid, pid, prid) {
+  const a = findAct(aid, oid, eid, pid, prid);
+  if (!a) return;
+  a.removido = false;
+  delete a.fechaRemocion;
   const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
   renderDashboard();
   if (currentView === 'arbol') renderArbol();
   if (currentView === 'kanban') renderKanban();
   pushToFirebase();
-  showToast('✓ Proyecto restaurado al plan activo');
+  showToast('✓ Actividad restaurada al plan activo');
 }
 
 // ============================================
-//  PROYECTOS REMOVIDOS — PANEL
+//  ACTIVIDADES REMOVIDAS — PANEL
 // ============================================
-function renderProyectosRemovidos() {
+function renderActividadesRemovidas() {
   const wrap = document.getElementById('proyectos-removidos-wrap');
   if (!wrap) return;
-  const removidos = [];
+  const removidas = [];
   S.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
-    p.proyectos.filter(pr => pr.removido).forEach(pr =>
-      removidos.push({ pr, p, e, o })))));
+    p.proyectos.forEach(pr =>
+      pr.actividades.filter(a => a.removido).forEach(a =>
+        removidas.push({a, pr, p, e, o}))))));
 
-  if (removidos.length === 0) {
-    wrap.innerHTML = '';
-    return;
-  }
+  if (removidas.length === 0) { wrap.innerHTML = ''; return; }
 
   const fechaFormato = iso => {
     if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const items = removidos.map(({ pr, p, e, o }) => {
+  const items = removidas.map(({a, pr, p, e, o}) => {
     const progN = p.title.replace(/PROG \d+[\.\d-]*\. /, '');
-    const objN  = o.proceso || o.id;
     const restoreBtn = READ_ONLY ? '' : `
-      <button class="btn-restaurar" data-prid="${pr.id}" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}">
+      <button class="btn-restaurar-act" data-aid="${a.id}" data-oid="${o.id}" data-eid="${e.id}" data-pid="${p.id}" data-prid="${pr.id}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
         Restaurar
       </button>`;
-    return `<div class="proy-removido-item">
+    return `<div class="act-removida-item">
       <div>
-        <div class="proy-removido-title">${escapeHtml(pr.title)}</div>
-        <div class="proy-removido-meta">${escapeHtml(progN)} · ${escapeHtml(objN)} · Removido: ${fechaFormato(pr.fechaRemocion)}</div>
+        <div class="act-removida-title">${escapeHtml(a.title)}</div>
+        <div class="act-removida-meta">${escapeHtml(pr.title)} · ${escapeHtml(progN)} · Removida: ${fechaFormato(a.fechaRemocion)}</div>
       </div>
       ${restoreBtn}
     </div>`;
   }).join('');
 
   wrap.innerHTML = `
-    <div class="proy-removidos-panel">
-      <div class="proy-removidos-header">
+    <div class="act-removidas-panel">
+      <div class="act-removidas-header">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="10" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/></svg>
-        Proyectos removidos (${removidos.length})
+        Actividades removidas (${removidas.length})
       </div>
       ${items}
     </div>`;
 
-  // Event delegation para botones restaurar
-  wrap.querySelectorAll('.btn-restaurar').forEach(btn => {
+  wrap.querySelectorAll('.btn-restaurar-act').forEach(btn => {
     btn.addEventListener('click', () => {
-      restaurarProyecto(btn.dataset.prid, btn.dataset.pid, btn.dataset.eid, btn.dataset.oid);
+      restoreActivity(btn.dataset.aid, btn.dataset.oid, btn.dataset.eid, btn.dataset.pid, btn.dataset.prid);
     });
   });
 }
 
 // ============================================
-//  AGREGAR PROYECTO — MODAL
+//  AGREGAR ACTIVIDAD — MODAL
 // ============================================
-let _addProgContext = null;
+let _addActContext = null;
 
-function openAddProjectModal(progId, estId, objId) {
-  _addProgContext = { progId, estId, objId };
-  _chipsData['ap-chips-container'] = [];
+function openAddActivityModal(prid, pid, eid, oid) {
+  const o = S.find(x => x.id === oid);
+  const e = o?.estrategias.find(x => x.id === eid);
+  const p = e?.programas.find(x => x.id === pid);
+  const pr = p?.proyectos.find(x => x.id === prid);
+  if (!pr) return;
+  _addActContext = { prid, pid, eid, oid };
 
-  // Poblar dropdown de objetivos
-  const objSel = document.getElementById('ap-objetivo');
-  objSel.innerHTML = '<option value="">— Seleccionar objetivo —</option>' +
-    S.map(o => `<option value="${o.id}"${o.id===objId?' selected':''}>${o.title}</option>`).join('');
+  const infoEl = document.getElementById('aa-proyecto-info');
+  if (infoEl) infoEl.textContent = `Proyecto: ${pr.id} — ${pr.title}`;
 
-  // Poblar dropdown de programas
-  populateApProgramas(objId, progId);
-
-  // Limpiar campos
-  ['ap-nombre','ap-descripcion','ap-meta-ind','ap-resp-input','ap-fecha-inicio','ap-fecha-fin'].forEach(id => {
+  ['aa-titulo','aa-indicador','aa-resp-input'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  renderChips('ap-chips-container', [], false);
-  document.getElementById('ap-error').style.display = 'none';
-  document.getElementById('modal-agregar-proyecto').classList.add('open');
+  document.getElementById('aa-plazo').value = 'ND';
+  renderChips('aa-resp-chips', [], false);
+  document.getElementById('aa-error').style.display = 'none';
+  document.getElementById('modal-agregar-actividad').classList.add('open');
 }
 
-function populateApProgramas(objId, preselect) {
-  const obj = S.find(o => o.id === objId);
-  const sel = document.getElementById('ap-programa');
-  if (!obj) {
-    sel.innerHTML = '<option value="">— Primero seleccione objetivo —</option>';
-    return;
-  }
-  const progs = obj.estrategias.flatMap(e => e.programas);
-  sel.innerHTML = '<option value="">— Seleccionar programa —</option>' +
-    progs.map(p => {
-      const shortN = p.title.replace(/PROG \d+[\.\d-]*\. /, '');
-      return `<option value="${p.id}"${p.id===preselect?' selected':''}>${shortN}</option>`;
-    }).join('');
-}
-
-document.getElementById('ap-objetivo').addEventListener('change', e => {
-  populateApProgramas(e.target.value, '');
-});
-
-document.getElementById('ap-resp-add').addEventListener('click', () => {
-  const inp = document.getElementById('ap-resp-input');
-  if (addChip('ap-chips-container', inp.value)) inp.value = '';
+document.getElementById('aa-resp-add').addEventListener('click', () => {
+  const inp = document.getElementById('aa-resp-input');
+  if (addChip('aa-resp-chips', inp.value)) inp.value = '';
   inp.focus();
 });
-document.getElementById('ap-resp-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('ap-resp-add').click(); }
+document.getElementById('aa-resp-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('aa-resp-add').click(); }
 });
 
-document.getElementById('ap-btn-cancelar').addEventListener('click', () => {
-  document.getElementById('modal-agregar-proyecto').classList.remove('open');
-  _addProgContext = null;
+document.getElementById('aa-btn-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-agregar-actividad').classList.remove('open');
+  _addActContext = null;
 });
-document.getElementById('modal-agregar-proyecto').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-agregar-proyecto')) {
-    document.getElementById('modal-agregar-proyecto').classList.remove('open');
-    _addProgContext = null;
+document.getElementById('modal-agregar-actividad').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-agregar-actividad')) {
+    document.getElementById('modal-agregar-actividad').classList.remove('open');
+    _addActContext = null;
   }
 });
 
-document.getElementById('ap-btn-guardar').addEventListener('click', () => {
-  const errEl = document.getElementById('ap-error');
+document.getElementById('aa-btn-guardar').addEventListener('click', () => {
+  const errEl = document.getElementById('aa-error');
   errEl.style.display = 'none';
-  const objId  = document.getElementById('ap-objetivo').value;
-  const progId = document.getElementById('ap-programa').value;
-  const nombre = document.getElementById('ap-nombre').value.trim();
-  const fi = document.getElementById('ap-fecha-inicio').value;
-  const ff = document.getElementById('ap-fecha-fin').value;
-
-  // Validaciones
-  const errores = [];
-  if (!objId)  errores.push('Selecciona el objetivo estratégico.');
-  if (!progId) errores.push('Selecciona el programa.');
-  if (!nombre) errores.push('El nombre del proyecto es obligatorio.');
-  if (fi && ff && ff < fi) errores.push('La fecha fin debe ser igual o posterior a la fecha inicio.');
-
-  // Validar que el programa pertenece al objetivo
-  if (objId && progId) {
-    const objData = S.find(o => o.id === objId);
-    const progExists = objData?.estrategias.flatMap(e => e.programas).some(p => p.id === progId);
-    if (!progExists) errores.push('El programa seleccionado no pertenece al objetivo seleccionado.');
-  }
-
-  if (errores.length) {
-    errEl.innerHTML = errores.map(e => `<div>· ${e}</div>`).join('');
+  if (!_addActContext) return;
+  const titulo = document.getElementById('aa-titulo').value.trim();
+  if (!titulo) {
+    errEl.textContent = 'El título de la actividad es obligatorio.';
     errEl.style.display = '';
     return;
   }
+  const {prid, pid, eid, oid} = _addActContext;
+  const o = S.find(x => x.id === oid);
+  const e = o?.estrategias.find(x => x.id === eid);
+  const p = e?.programas.find(x => x.id === pid);
+  const pr = p?.proyectos.find(x => x.id === prid);
+  if (!pr) { errEl.textContent = 'Error: proyecto no encontrado.'; errEl.style.display=''; return; }
 
-  // Generar ID único
-  const newId = (typeof crypto !== 'undefined' && crypto.randomUUID)
-    ? 'PROJ-' + crypto.randomUUID().split('-')[0]
-    : 'PROJ-' + Date.now();
-
-  const activInitial = {
+  const responsables = [...(_chipsData['aa-resp-chips'] || [])];
+  const newAct = {
     id: 'ACT-' + Date.now(),
-    title: `Actividad inicial — ${nombre}`,
-    indicador: '',
+    title: titulo,
+    indicador: document.getElementById('aa-indicador').value.trim(),
     meta: 0,
     ejecutado: 0,
     pct: 0,
     descripcion: '',
-    responsable: '',
-    plazo: 'ND',
-    notas: ''
+    responsable: responsables.join(', ') || '',
+    responsables,
+    plazo: document.getElementById('aa-plazo').value,
+    notas: '',
+    esNueva: true,
+    fechaCreacion: new Date().toISOString()
   };
-  if (fi) activInitial.fechaInicio = fi;
-  if (ff) activInitial.fechaFin = ff;
+  pr.actividades.push(newAct);
 
-  const newProject = {
-    id: newId,
-    title: nombre,
-    descripcion: document.getElementById('ap-descripcion').value.trim(),
-    meta: document.getElementById('ap-meta-ind').value.trim(),
-    responsables: [...(_chipsData['ap-chips-container'] || [])],
-    esNuevo: true,
-    fechaCreacion: new Date().toISOString(),
-    actividades: [activInitial]
-  };
-  if (fi) newProject.fechaInicio = fi;
-  if (ff) newProject.fechaFin = ff;
-
-  // Insertar en la estructura
-  const objData = S.find(o => o.id === objId);
-  const prog = objData?.estrategias.flatMap(e => e.programas).find(p => p.id === progId);
-  if (!prog) { errEl.textContent = 'Error: programa no encontrado.'; errEl.style.display=''; return; }
-  prog.proyectos.push(newProject);
-
-  document.getElementById('modal-agregar-proyecto').classList.remove('open');
-  _addProgContext = null;
+  document.getElementById('modal-agregar-actividad').classList.remove('open');
+  _addActContext = null;
 
   const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
   renderDashboard();
   if (currentView === 'arbol') renderArbol();
   if (currentView === 'kanban') renderKanban();
   pushToFirebase();
-  showToast('✓ Proyecto agregado al plan');
+  showToast('✓ Actividad agregada al plan');
 });
+
+// ============================================
+//  CONTADOR DINÁMICO DE ACTIVIDADES
+// ============================================
+function updateLandingCounter() {
+  const total = allActs().length;
+  const el1 = document.getElementById('landing-act-count');
+  const el2 = document.getElementById('landing-stat-act-n');
+  if (el1) el1.textContent = total;
+  if (el2) el2.textContent = total;
+}
 
 // ============================================
 //  GRÁFICA A — TREEMAP (D3.js)
@@ -2018,15 +1909,14 @@ function renderTreemap(allActsData) {
       name: obj.title,
       objId: obj.id,
       children: obj.estrategias.flatMap(e => e.programas).map(prog => {
-        const projsA = prog.proyectos.filter(proyectoActivo);
         const progActs = allActsData.filter(x => x.p.id === prog.id);
         const pct = avgPct(progActs.map(x => x.a.pct));
         return {
           name: prog.title.replace(/PROG \d+[\.\d-]*\. /, ''),
           objId: obj.id,
-          value: projsA.length || 1,
+          value: prog.proyectos.length || 1,
           actCount: progActs.length,
-          projCount: projsA.length,
+          projCount: prog.proyectos.length,
           pct
         };
       })
@@ -2229,13 +2119,12 @@ function renderSunburst(allActsData) {
         name: ['Conocimiento','Reducción','Respuesta','Gobernanza'][i] || obj.proceso,
         type: 'obj', objId: obj.id, avg: objAvg,
         children: progs.map(prog => {
-          const projsA = prog.proyectos.filter(proyectoActivo);
           const progActs = allActsData.filter(x => x.p.id === prog.id);
           const progAvg = avgPct(progActs.map(x => x.a.pct));
           const shortN = prog.title.replace(/PROG \d+[\.\d-]*\. /, '').substring(0, 28);
           return {
-            name: shortN, type: 'prog', avg: progAvg, count: projsA.length,
-            value: projsA.length || 1
+            name: shortN, type: 'prog', avg: progAvg, count: prog.proyectos.length,
+            value: prog.proyectos.length || 1
           };
         })
       };

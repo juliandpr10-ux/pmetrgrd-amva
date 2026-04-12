@@ -1091,53 +1091,31 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   display: flex; align-items: stretch; gap: 0;
   margin-bottom: 2px;
 }
-.tree-proy-row .tree-proy-btn { border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: 1px solid rgba(255,255,255,.08); }
-.tree-proy-detail-btn {
-  padding: 0 10px;
-  background: rgba(255,255,255,.06); border: 1px solid var(--border); border-left: none;
-  border-radius: 0 var(--r-sm) var(--r-sm) 0; color: var(--text3);
-  cursor: pointer; display: flex; align-items: center; transition: all .15s; flex-shrink: 0;
-}
-.tree-proy-detail-btn:hover { background: rgba(102,204,51,.15); color: var(--green-pri); }
-
-/* ── Botón agregar proyecto ── */
-.btn-agregar-proyecto {
-  display: flex; align-items: center; gap: 6px; margin: 6px 0 4px 16px;
-  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  border: 1px dashed rgba(102,204,51,.4); background: rgba(102,204,51,.07);
-  color: var(--green-pri); cursor: pointer; transition: all .15s;
-}
-.btn-agregar-proyecto:hover { background: rgba(102,204,51,.15); border-color: var(--green-pri); }
-
-/* ── Modal proyecto ── */
-.modal-proyecto-box { max-width: 560px; }
 
 /* ── Chips de responsables ── */
 .chips-container {
   display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px;
-  padding: 4px 0; margin-bottom: 6px;
+  padding: 6px 8px; border-radius: 6px; background: var(--surface2);
+  border: 1px solid var(--border); margin-bottom: 6px;
 }
 .chip-tag {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: #E8F5E9; border: 1px solid #339B33; color: #1B5E20;
-  border-radius: 20px; padding: 4px 10px; font-size: 13px;
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+  background: rgba(102,204,51,.15); color: var(--green-pri);
+  border: 1px solid rgba(102,204,51,.3); border-radius: 12px; font-size: 12px; font-weight: 500;
 }
 .chip-remove {
-  background: none; border: none; cursor: pointer; color: #1B5E20;
-  font-size: 16px; line-height: 1; padding: 0; display: flex; align-items: center;
-  opacity: 0.6; transition: opacity .15s;
+  background: none; border: none; cursor: pointer; color: inherit;
+  font-size: 14px; line-height: 1; padding: 0 2px; opacity: .7; transition: opacity .15s;
 }
 .chip-remove:hover { opacity: 1; }
-.chip-input-row {
-  display: flex; gap: 6px; align-items: center;
-}
+.chip-input-row { display: flex; gap: 6px; align-items: center; }
 .chip-input { flex: 1; }
 .btn-chip-add {
-  padding: 7px 10px; background: rgba(102,204,51,.15); border: 1px solid var(--green-pri);
-  border-radius: var(--r-sm); color: var(--green-pri); cursor: pointer;
-  display: flex; align-items: center; transition: background .15s; flex-shrink: 0;
+  flex-shrink: 0; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--green-pri); cursor: pointer;
+  display: flex; align-items: center; transition: all .15s;
 }
-.btn-chip-add:hover { background: rgba(102,204,51,.25); }
+.btn-chip-add:hover { background: rgba(102,204,51,.1); }
 
 /* ── Botones de acción danger ── */
 .btn-danger {
@@ -1154,31 +1132,31 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .btn-danger-outline:hover { background: #DC354520; }
 .modo-lectura .btn-danger, .modo-lectura .btn-danger-outline { display: none !important; }
 
-/* ── Proyectos removidos ── */
-.proy-removidos-panel {
-  background: #FFF8F8; border-left: 3px solid #DC3545;
-  border: 1px solid rgba(220,53,69,.25); border-left: 3px solid #DC3545;
-  border-radius: 8px; padding: 16px; font-family: 'DM Sans', sans-serif;
+/* ── Actividades removidas ── */
+.act-removidas-panel {
+  background: var(--surface); border: 1px solid rgba(220,53,69,.3);
+  border-left: 3px solid #DC3545; border-radius: 8px; padding: 16px;
+  font-family: 'DM Sans', sans-serif; margin-top: 8px;
 }
-.proy-removidos-header {
+.act-removidas-header {
   display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;
-  color: #DC3545; margin-bottom: 12px;
+  color: #ff6b6b; margin-bottom: 12px;
 }
-.proy-removido-item {
+.act-removida-item {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 10px 12px; border-radius: 6px; background: rgba(220,53,69,.04);
-  border: 1px solid rgba(220,53,69,.1); margin-bottom: 6px;
+  padding: 10px 12px; border-radius: 6px; background: rgba(220,53,69,.06);
+  border: 1px solid rgba(220,53,69,.12); margin-bottom: 6px;
 }
-.proy-removido-title { font-size: 13px; font-weight: 600; color: #333; }
-.proy-removido-meta  { font-size: 11px; color: #888; margin-top: 2px; }
-.btn-restaurar {
+.act-removida-title { font-size: 13px; font-weight: 600; color: var(--text1); }
+.act-removida-meta  { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.btn-restaurar-act {
   display: flex; align-items: center; gap: 5px; padding: 5px 12px;
-  border: 1px solid #339B33; background: rgba(51,155,51,.08); color: #339B33;
+  border: 1px solid #66CC33; background: rgba(102,204,51,.08); color: #66CC33;
   border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer;
   white-space: nowrap; transition: all .15s; flex-shrink: 0;
 }
-.btn-restaurar:hover { background: rgba(51,155,51,.2); }
-.modo-lectura .btn-restaurar { display: none !important; }
+.btn-restaurar-act:hover { background: rgba(102,204,51,.2); }
+.modo-lectura .btn-restaurar-act { display: none !important; }
 
 /* ── Sección análisis visual del plan ── */
 .viz-section-sep {
@@ -1186,15 +1164,16 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .viz-sep-line { flex: 1; height: 1px; background: var(--border2); }
 .viz-sep-title {
-  font-size: 13px; font-weight: 700; color: var(--green-dark);
+  font-size: 13px; font-weight: 700; color: var(--green-pri);
   text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
 }
 .viz-card {
-  background: white; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,.25);
   border-radius: 12px; padding: 20px; margin-bottom: 20px; overflow: hidden;
+  border: 1px solid var(--border);
 }
 .viz-card-title {
-  font-size: 13px; font-weight: 700; color: #1B5E20;
+  font-size: 13px; font-weight: 700; color: var(--green-pri);
   margin-bottom: 14px;
 }
 .viz-row {
@@ -1210,10 +1189,15 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 }
 .sunburst-back-btn:hover { background: rgba(51,155,51,.2); }
 
-/* ── Modo lectura: ocultar botones de edición ── */
-.modo-lectura .mp-actions-edit { display: none !important; }
-.modo-lectura .btn-agregar-proyecto { display: none !important; }
-.modo-lectura .tree-proy-detail-btn { pointer-events: auto; } /* sí se puede ver detalle */
+/* ── Agregar actividad btn ── */
+.btn-agregar-actividad {
+  display: flex; align-items: center; gap: 6px; margin: 6px 0 2px 12px;
+  padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  border: 1px dashed rgba(102,204,51,.4); background: transparent; color: var(--green-pri);
+  cursor: pointer; transition: all .15s;
+}
+.btn-agregar-actividad:hover { background: rgba(102,204,51,.08); border-style: solid; }
+.modo-lectura .btn-agregar-actividad { display: none !important; }
 
 /* ── Responsive charts ── */
 @media (max-width: 768px) {
