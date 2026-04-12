@@ -1176,18 +1176,6 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
   font-size: 14px; font-weight: 700; color: #66CC33;
   text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px;
 }
-.viz-row {
-  display: flex; gap: 20px; align-items: stretch;
-}
-.viz-row .viz-card { flex: 1; min-width: 0; }
-
-/* ── Sunburst back button ── */
-.sunburst-back-btn {
-  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  border: 1px solid #339B33; background: rgba(51,155,51,.1); color: #339B33;
-  cursor: pointer; transition: background .15s;
-}
-.sunburst-back-btn:hover { background: rgba(51,155,51,.2); }
 
 /* ── Agregar actividad btn ── */
 .btn-agregar-actividad {
@@ -1199,9 +1187,3 @@ textarea.form-input { min-height: 80px; resize: vertical; line-height: 1.5; }
 .btn-agregar-actividad:hover { background: rgba(102,204,51,.08); border-style: solid; }
 .modo-lectura .btn-agregar-actividad { display: none !important; }
 
-/* ── Responsive charts ── */
-@media (max-width: 768px) {
-  .viz-row { flex-direction: column; }
-  .viz-card { min-height: 300px; }
-  .viz-row .viz-card { flex: none; }
-}
