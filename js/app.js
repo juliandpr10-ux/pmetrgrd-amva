@@ -13,9 +13,10 @@ if (_isMobile && _urlParams.get('modo') !== 'lectura') {
 if (READ_ONLY) {
   document.body.classList.add('modo-lectura');
 
-  // Etiquetas cortas en la barra de navegación
+  // Etiquetas cortas en la barra de navegación (actualiza solo el span de texto, no el SVG)
   document.querySelectorAll('.nav-btn[data-short]').forEach(btn => {
-    btn.textContent = btn.dataset.short;
+    const lbl = btn.querySelector('.nav-lbl');
+    if (lbl) lbl.textContent = btn.dataset.short;
   });
 
   // Bloquear modales en fase de CAPTURA (antes que cualquier listener existente)
@@ -32,6 +33,9 @@ if (READ_ONLY) {
 let S = JSON.parse(JSON.stringify(RAW));
 let editRef = null;
 const exp = {};
+
+// ── Helper: proyecto activo (no removido) ─────────────────────────
+function proyectoActivo(p) { return !p.removido; }
 
 // ── Mapa Valle de Aburrá — datos DANE 2023 (proyecciones) ────────
 const MUN_DATA = {
@@ -120,7 +124,8 @@ function loadFromLocalStorage() {
 function allActs() {
   const r = [];
   S.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
-    p.proyectos.forEach(pr => pr.actividades.forEach(a => r.push({a,pr,p,e,o}))))));
+    p.proyectos.filter(proyectoActivo).forEach(pr =>
+      pr.actividades.forEach(a => r.push({a,pr,p,e,o}))))));
   return r;
 }
 function avgPct(arr) { return arr.length ? Math.round(arr.reduce((s,x) => s + Math.min(x,100), 0) / arr.length) : 0; }
@@ -260,6 +265,11 @@ function renderDashboard() {
   renderObjCards(all);
   renderProcCards(all);
   populateFilters(all);
+  // Nuevas visualizaciones
+  renderTreemap(all);
+  renderGantt(all);
+  renderSunburst(all);
+  renderProyectosRemovidos();
 }
 
 // ── Animated Donut Chart ──────────────────────────────────────────
@@ -822,15 +832,21 @@ function renderArbol() {
           <span class="chev ${pp2?'open':''}">▶</span>
         </button>
         <div id="${pid}" class="tree-children ${pp2?'':'hidden'}">`;
-        p.proyectos.forEach(pr => {
+        p.proyectos.filter(proyectoActivo).forEach(pr => {
           const pra = pa.filter(x => x.pr.id === pr.id);
           if (!pra.length) return;
           const prid = 'n_' + o.id + '_' + e.id + '_' + p.id + '_' + pr.id;
           const prp = exp[prid] !== false;
-          h += `<button class="tree-proy-btn" data-toggle="${prid}">
-            <span><strong style="font-weight:600">${pr.id}</strong> — ${pr.title}</span>
-            <span class="chev ${prp?'open':''}">▶</span>
-          </button>
+          const nuevoB = (pr.esNuevo || false) ? '<span class="badge-nuevo">Nuevo</span> ' : '';
+          h += `<div class="tree-proy-row">
+            <button class="tree-proy-btn" data-toggle="${prid}" style="flex:1">
+              <span>${nuevoB}<strong style="font-weight:600">${pr.id}</strong> — ${pr.title}</span>
+              <span class="chev ${prp?'open':''}">▶</span>
+            </button>
+            <button class="tree-proy-detail-btn" data-prid="${pr.id}" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}" title="Ver/editar detalle del proyecto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+            </button>
+          </div>
           <div id="${prid}" class="tree-children ${prp?'':'hidden'}">
             <div class="act-table-wrap"><table class="act-table">
               <thead><tr>
@@ -858,6 +874,13 @@ function renderArbol() {
           });
           h += `</tbody></table></div></div>`;
         });
+        // Botón agregar proyecto (solo modo editable)
+        if (!READ_ONLY) {
+          h += `<button class="btn-agregar-proyecto" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Agregar proyecto
+          </button>`;
+        }
         h += `</div>`;
       });
       h += `</div>`;
@@ -867,11 +890,16 @@ function renderArbol() {
   h += '</div>';
   const root = document.getElementById('tree-root');
   root.innerHTML = h;
+  renderProyectosRemovidos();
 }
 
 document.getElementById('tree-root').addEventListener('click', e => {
   const btn = e.target.closest('[data-toggle]');
   if (btn) { toggle(btn.dataset.toggle); return; }
+  const detailBtn = e.target.closest('.tree-proy-detail-btn');
+  if (detailBtn) { openProjectModal(detailBtn.dataset.prid, detailBtn.dataset.pid, detailBtn.dataset.eid, detailBtn.dataset.oid); return; }
+  const addBtn = e.target.closest('.btn-agregar-proyecto');
+  if (addBtn) { openAddProjectModal(addBtn.dataset.pid, addBtn.dataset.eid, addBtn.dataset.oid); return; }
   const row = e.target.closest('.act-row');
   if (row) openModal(row.dataset.act, row.dataset.o, row.dataset.e, row.dataset.p, row.dataset.pr);
 });
@@ -909,7 +937,7 @@ function renderKanban() {
   });
   const mkCard = (col) => ({a, o, e, p, pr}) =>
     `<div class="k-card" data-act="${a.id}" data-o="${o.id}" data-e="${e.id}" data-p="${p.id}" data-pr="${pr.id}">
-      <div class="k-card-title">${a.title}</div>
+      <div class="k-card-title">${(pr.esNuevo||false)?'<span class="badge-nuevo">Nuevo</span> ':''}${a.title}</div>
       <div class="k-card-foot">
         <span class="k-tag" style="background:${OBJ_COL[o.id]}18;color:${OBJ_COL[o.id]}">${o.proceso}</span>
         <span style="font-size:10px;color:var(--text3)">${a.responsable || '—'}</span>
@@ -1050,7 +1078,7 @@ function exportToExcel() {
           est.programas.forEach(prog => {
             rows.push([prog.title, '', '', '', '', '', '', '', '', '']);
             rows.push(['Nro', 'PROYECTO', 'ACTIVIDAD', 'INDICADOR', 'META', 'EJECUTADO', '% EJECUCION', 'DESCRIPCION', 'RESPONSABLE', 'NOTAS']);
-            prog.proyectos.forEach(proy => {
+            prog.proyectos.filter(proyectoActivo).forEach(proy => {
               proy.actividades.forEach((act, idx) => {
                 rows.push([
                   idx === 0 ? proy.id : '',
@@ -1598,4 +1626,744 @@ function clearAllResps(id) {
   updateRespLabel(id);
   if (id === 'f-resp') renderArbol();
   if (id === 'k-resp') renderKanban();
+}
+
+// ============================================
+//  PROYECTO — HELPER DE BÚSQUEDA
+// ============================================
+function findProject(prid, pid, eid, oid) {
+  const o = S.find(x => x.id === oid);
+  const e = o?.estrategias.find(x => x.id === eid);
+  const p = e?.programas.find(x => x.id === pid);
+  return p?.proyectos.find(x => x.id === prid);
+}
+
+// ============================================
+//  PROYECTO — MODAL DE DETALLE
+// ============================================
+let projectEditRef = null;
+
+function openProjectModal(prid, pid, eid, oid) {
+  const pr = findProject(prid, pid, eid, oid);
+  if (!pr) return;
+  projectEditRef = { prid, pid, eid, oid };
+
+  document.getElementById('mp-title-display').textContent = pr.title;
+  const nuevoB = document.getElementById('mp-nuevo-badge');
+  nuevoB.style.display = (pr.esNuevo || false) ? '' : 'none';
+
+  document.getElementById('mp-meta-ind').value = pr.meta || '';
+  document.getElementById('mp-fecha-inicio').value = pr.fechaInicio || '';
+  document.getElementById('mp-fecha-fin').value = pr.fechaFin || '';
+  document.getElementById('mp-descripcion').value = pr.descripcion || '';
+
+  // Chips de responsables
+  const isRO = READ_ONLY;
+  renderChips('mp-chips-container', pr.responsables || [], isRO);
+  const inputRow = document.getElementById('mp-chip-input-row');
+  if (inputRow) inputRow.style.display = isRO ? 'none' : '';
+  if (!isRO) document.getElementById('mp-resp-input').value = '';
+
+  // Acciones según modo
+  document.getElementById('mp-actions-edit').style.display = isRO ? 'none' : '';
+  document.getElementById('mp-actions-readonly').style.display = isRO ? '' : 'none';
+
+  document.getElementById('modal-proyecto').classList.add('open');
+}
+
+function closeProjectModal() {
+  document.getElementById('modal-proyecto').classList.remove('open');
+  projectEditRef = null;
+}
+
+// Chips genérico — usado en proyecto modal y add-project
+let _chipsData = {};
+function renderChips(containerId, chips, readOnly) {
+  _chipsData[containerId] = [...chips];
+  const cont = document.getElementById(containerId);
+  if (!cont) return;
+  cont.innerHTML = _chipsData[containerId].map((c, i) => `
+    <span class="chip-tag">
+      ${escapeHtml(c)}
+      ${readOnly ? '' : `<button class="chip-remove" data-container="${containerId}" data-idx="${i}" title="Eliminar">×</button>`}
+    </span>`).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addChip(containerId, value) {
+  const v = value.trim();
+  if (!v) return false;
+  if (!_chipsData[containerId]) _chipsData[containerId] = [];
+  if (_chipsData[containerId].includes(v)) return false;
+  _chipsData[containerId].push(v);
+  renderChips(containerId, _chipsData[containerId], false);
+  return true;
+}
+
+// Event delegation para remover chips
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.chip-remove');
+  if (!btn) return;
+  const cont = btn.dataset.container;
+  const idx = parseInt(btn.dataset.idx);
+  if (!cont || isNaN(idx)) return;
+  _chipsData[cont].splice(idx, 1);
+  renderChips(cont, _chipsData[cont], false);
+});
+
+// Listener agregar chip en modal de proyecto
+document.getElementById('mp-resp-add').addEventListener('click', () => {
+  const inp = document.getElementById('mp-resp-input');
+  if (addChip('mp-chips-container', inp.value)) inp.value = '';
+  inp.focus();
+});
+document.getElementById('mp-resp-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('mp-resp-add').click(); }
+});
+
+// Guardar proyecto modal
+document.getElementById('mp-btn-guardar').addEventListener('click', () => {
+  if (!projectEditRef) return;
+  const pr = findProject(projectEditRef.prid, projectEditRef.pid, projectEditRef.eid, projectEditRef.oid);
+  if (!pr) return;
+  pr.responsables = [...(_chipsData['mp-chips-container'] || [])];
+  pr.meta = document.getElementById('mp-meta-ind').value.trim();
+  pr.fechaInicio = document.getElementById('mp-fecha-inicio').value;
+  pr.fechaFin = document.getElementById('mp-fecha-fin').value;
+  pr.descripcion = document.getElementById('mp-descripcion').value.trim();
+  closeProjectModal();
+  pushToFirebase();
+  showToast('✓ Proyecto actualizado y sincronizado');
+});
+
+document.getElementById('mp-btn-cancelar').addEventListener('click', closeProjectModal);
+document.getElementById('mp-btn-cerrar-ro').addEventListener('click', closeProjectModal);
+document.getElementById('modal-proyecto').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-proyecto')) closeProjectModal();
+});
+
+// ============================================
+//  REMOVER PROYECTO
+// ============================================
+let _removeRef = null;
+
+document.getElementById('mp-btn-remover').addEventListener('click', () => {
+  if (!projectEditRef) return;
+  const pr = findProject(projectEditRef.prid, projectEditRef.pid, projectEditRef.eid, projectEditRef.oid);
+  if (!pr) return;
+  _removeRef = { ...projectEditRef };
+  document.getElementById('modal-confirmar-msg').textContent =
+    `¿Remover el proyecto "${pr.title}" del plan activo?`;
+  closeProjectModal();
+  document.getElementById('modal-confirmar-remover').classList.add('open');
+});
+
+document.getElementById('modal-confirmar-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-confirmar-remover').classList.remove('open');
+  _removeRef = null;
+});
+document.getElementById('modal-confirmar-remover').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-confirmar-remover')) {
+    document.getElementById('modal-confirmar-remover').classList.remove('open');
+    _removeRef = null;
+  }
+});
+
+document.getElementById('modal-confirmar-ok').addEventListener('click', () => {
+  if (!_removeRef) return;
+  const pr = findProject(_removeRef.prid, _removeRef.pid, _removeRef.eid, _removeRef.oid);
+  if (!pr) return;
+  pr.removido = true;
+  pr.fechaRemocion = new Date().toISOString();
+  document.getElementById('modal-confirmar-remover').classList.remove('open');
+  _removeRef = null;
+  const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
+  renderDashboard();
+  if (currentView === 'arbol') renderArbol();
+  if (currentView === 'kanban') renderKanban();
+  pushToFirebase();
+  showToast('Proyecto removido del plan activo');
+});
+
+function restaurarProyecto(prid, pid, eid, oid) {
+  const pr = findProject(prid, pid, eid, oid);
+  if (!pr) return;
+  pr.removido = false;
+  delete pr.fechaRemocion;
+  const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
+  renderDashboard();
+  if (currentView === 'arbol') renderArbol();
+  if (currentView === 'kanban') renderKanban();
+  pushToFirebase();
+  showToast('✓ Proyecto restaurado al plan activo');
+}
+
+// ============================================
+//  PROYECTOS REMOVIDOS — PANEL
+// ============================================
+function renderProyectosRemovidos() {
+  const wrap = document.getElementById('proyectos-removidos-wrap');
+  if (!wrap) return;
+  const removidos = [];
+  S.forEach(o => o.estrategias.forEach(e => e.programas.forEach(p =>
+    p.proyectos.filter(pr => pr.removido).forEach(pr =>
+      removidos.push({ pr, p, e, o })))));
+
+  if (removidos.length === 0) {
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const fechaFormato = iso => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const items = removidos.map(({ pr, p, e, o }) => {
+    const progN = p.title.replace(/PROG \d+[\.\d-]*\. /, '');
+    const objN  = o.proceso || o.id;
+    const restoreBtn = READ_ONLY ? '' : `
+      <button class="btn-restaurar" data-prid="${pr.id}" data-pid="${p.id}" data-eid="${e.id}" data-oid="${o.id}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Restaurar
+      </button>`;
+    return `<div class="proy-removido-item">
+      <div>
+        <div class="proy-removido-title">${escapeHtml(pr.title)}</div>
+        <div class="proy-removido-meta">${escapeHtml(progN)} · ${escapeHtml(objN)} · Removido: ${fechaFormato(pr.fechaRemocion)}</div>
+      </div>
+      ${restoreBtn}
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="proy-removidos-panel">
+      <div class="proy-removidos-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="10" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/></svg>
+        Proyectos removidos (${removidos.length})
+      </div>
+      ${items}
+    </div>`;
+
+  // Event delegation para botones restaurar
+  wrap.querySelectorAll('.btn-restaurar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      restaurarProyecto(btn.dataset.prid, btn.dataset.pid, btn.dataset.eid, btn.dataset.oid);
+    });
+  });
+}
+
+// ============================================
+//  AGREGAR PROYECTO — MODAL
+// ============================================
+let _addProgContext = null;
+
+function openAddProjectModal(progId, estId, objId) {
+  _addProgContext = { progId, estId, objId };
+  _chipsData['ap-chips-container'] = [];
+
+  // Poblar dropdown de objetivos
+  const objSel = document.getElementById('ap-objetivo');
+  objSel.innerHTML = '<option value="">— Seleccionar objetivo —</option>' +
+    S.map(o => `<option value="${o.id}"${o.id===objId?' selected':''}>${o.title}</option>`).join('');
+
+  // Poblar dropdown de programas
+  populateApProgramas(objId, progId);
+
+  // Limpiar campos
+  ['ap-nombre','ap-descripcion','ap-meta-ind','ap-resp-input','ap-fecha-inicio','ap-fecha-fin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  renderChips('ap-chips-container', [], false);
+  document.getElementById('ap-error').style.display = 'none';
+  document.getElementById('modal-agregar-proyecto').classList.add('open');
+}
+
+function populateApProgramas(objId, preselect) {
+  const obj = S.find(o => o.id === objId);
+  const sel = document.getElementById('ap-programa');
+  if (!obj) {
+    sel.innerHTML = '<option value="">— Primero seleccione objetivo —</option>';
+    return;
+  }
+  const progs = obj.estrategias.flatMap(e => e.programas);
+  sel.innerHTML = '<option value="">— Seleccionar programa —</option>' +
+    progs.map(p => {
+      const shortN = p.title.replace(/PROG \d+[\.\d-]*\. /, '');
+      return `<option value="${p.id}"${p.id===preselect?' selected':''}>${shortN}</option>`;
+    }).join('');
+}
+
+document.getElementById('ap-objetivo').addEventListener('change', e => {
+  populateApProgramas(e.target.value, '');
+});
+
+document.getElementById('ap-resp-add').addEventListener('click', () => {
+  const inp = document.getElementById('ap-resp-input');
+  if (addChip('ap-chips-container', inp.value)) inp.value = '';
+  inp.focus();
+});
+document.getElementById('ap-resp-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('ap-resp-add').click(); }
+});
+
+document.getElementById('ap-btn-cancelar').addEventListener('click', () => {
+  document.getElementById('modal-agregar-proyecto').classList.remove('open');
+  _addProgContext = null;
+});
+document.getElementById('modal-agregar-proyecto').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-agregar-proyecto')) {
+    document.getElementById('modal-agregar-proyecto').classList.remove('open');
+    _addProgContext = null;
+  }
+});
+
+document.getElementById('ap-btn-guardar').addEventListener('click', () => {
+  const errEl = document.getElementById('ap-error');
+  errEl.style.display = 'none';
+  const objId  = document.getElementById('ap-objetivo').value;
+  const progId = document.getElementById('ap-programa').value;
+  const nombre = document.getElementById('ap-nombre').value.trim();
+  const fi = document.getElementById('ap-fecha-inicio').value;
+  const ff = document.getElementById('ap-fecha-fin').value;
+
+  // Validaciones
+  const errores = [];
+  if (!objId)  errores.push('Selecciona el objetivo estratégico.');
+  if (!progId) errores.push('Selecciona el programa.');
+  if (!nombre) errores.push('El nombre del proyecto es obligatorio.');
+  if (fi && ff && ff < fi) errores.push('La fecha fin debe ser igual o posterior a la fecha inicio.');
+
+  // Validar que el programa pertenece al objetivo
+  if (objId && progId) {
+    const objData = S.find(o => o.id === objId);
+    const progExists = objData?.estrategias.flatMap(e => e.programas).some(p => p.id === progId);
+    if (!progExists) errores.push('El programa seleccionado no pertenece al objetivo seleccionado.');
+  }
+
+  if (errores.length) {
+    errEl.innerHTML = errores.map(e => `<div>· ${e}</div>`).join('');
+    errEl.style.display = '';
+    return;
+  }
+
+  // Generar ID único
+  const newId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? 'PROJ-' + crypto.randomUUID().split('-')[0]
+    : 'PROJ-' + Date.now();
+
+  const activInitial = {
+    id: 'ACT-' + Date.now(),
+    title: `Actividad inicial — ${nombre}`,
+    indicador: '',
+    meta: 0,
+    ejecutado: 0,
+    pct: 0,
+    descripcion: '',
+    responsable: '',
+    plazo: 'ND',
+    notas: ''
+  };
+  if (fi) activInitial.fechaInicio = fi;
+  if (ff) activInitial.fechaFin = ff;
+
+  const newProject = {
+    id: newId,
+    title: nombre,
+    descripcion: document.getElementById('ap-descripcion').value.trim(),
+    meta: document.getElementById('ap-meta-ind').value.trim(),
+    responsables: [...(_chipsData['ap-chips-container'] || [])],
+    esNuevo: true,
+    fechaCreacion: new Date().toISOString(),
+    actividades: [activInitial]
+  };
+  if (fi) newProject.fechaInicio = fi;
+  if (ff) newProject.fechaFin = ff;
+
+  // Insertar en la estructura
+  const objData = S.find(o => o.id === objId);
+  const prog = objData?.estrategias.flatMap(e => e.programas).find(p => p.id === progId);
+  if (!prog) { errEl.textContent = 'Error: programa no encontrado.'; errEl.style.display=''; return; }
+  prog.proyectos.push(newProject);
+
+  document.getElementById('modal-agregar-proyecto').classList.remove('open');
+  _addProgContext = null;
+
+  const currentView = document.querySelector('.nav-btn.active')?.dataset.view;
+  renderDashboard();
+  if (currentView === 'arbol') renderArbol();
+  if (currentView === 'kanban') renderKanban();
+  pushToFirebase();
+  showToast('✓ Proyecto agregado al plan');
+});
+
+// ============================================
+//  GRÁFICA A — TREEMAP (D3.js)
+// ============================================
+function renderTreemap(allActsData) {
+  const container = document.getElementById('chart-treemap');
+  if (!container || typeof d3 === 'undefined') return;
+  container.innerHTML = '';
+
+  const OBJ_BASE = { OBJ1:'#1B5E20', OBJ2:'#2E7D32', OBJ3:'#388E3C', OBJ4:'#4CAF50' };
+
+  const treeData = {
+    name: 'Plan',
+    children: S.map(obj => ({
+      name: obj.title,
+      objId: obj.id,
+      children: obj.estrategias.flatMap(e => e.programas).map(prog => {
+        const projsA = prog.proyectos.filter(proyectoActivo);
+        const progActs = allActsData.filter(x => x.p.id === prog.id);
+        const pct = avgPct(progActs.map(x => x.a.pct));
+        return {
+          name: prog.title.replace(/PROG \d+[\.\d-]*\. /, ''),
+          objId: obj.id,
+          value: projsA.length || 1,
+          actCount: progActs.length,
+          projCount: projsA.length,
+          pct
+        };
+      })
+    }))
+  };
+
+  const W = container.offsetWidth || 800;
+  const H = Math.max(300, Math.min(380, W * 0.48));
+  container.style.height = H + 'px';
+
+  const root = d3.hierarchy(treeData).sum(d => d.value).sort((a, b) => b.value - a.value);
+  d3.treemap().size([W, H]).paddingInner(2).paddingOuter(4).paddingTop(20)(root);
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', W).attr('height', H)
+    .style('display', 'block');
+
+  // Escala de color por objetivo (claro → oscuro según posición)
+  function cellColor(d) {
+    const base = OBJ_BASE[d.data.objId] || '#339B33';
+    return base;
+  }
+
+  const node = svg.selectAll('g').data(root.leaves()).enter().append('g')
+    .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+  node.append('rect')
+    .attr('width', d => Math.max(0, d.x1 - d.x0))
+    .attr('height', d => Math.max(0, d.y1 - d.y0))
+    .attr('fill', d => cellColor(d))
+    .attr('fill-opacity', (_, i) => 0.6 + (i % 4) * 0.1)
+    .attr('rx', 3)
+    .attr('stroke', '#0e1115')
+    .attr('stroke-width', 1);
+
+  node.append('text')
+    .attr('x', 5).attr('y', 14)
+    .attr('fill', 'white')
+    .attr('font-size', d => (d.x1 - d.x0) > 100 ? '11px' : '9px')
+    .attr('font-family', 'DM Sans, sans-serif')
+    .text(d => {
+      const w = d.x1 - d.x0;
+      const h2 = d.y1 - d.y0;
+      if (w < 40 || h2 < 18) return '';
+      const maxChars = Math.floor(w / 7);
+      return d.data.name.length > maxChars ? d.data.name.substring(0, maxChars - 1) + '…' : d.data.name;
+    });
+
+  node.append('text')
+    .attr('x', 5).attr('y', 28)
+    .attr('fill', 'rgba(255,255,255,0.75)')
+    .attr('font-size', '9px')
+    .attr('font-family', 'DM Sans, sans-serif')
+    .text(d => {
+      const w = d.x1 - d.x0;
+      const h2 = d.y1 - d.y0;
+      if (w < 60 || h2 < 32) return '';
+      return `${d.data.projCount} proy · ${d.data.pct}%`;
+    });
+
+  node.append('title').text(d =>
+    `${d.data.name}\n${d.data.projCount} proyecto(s) · ${d.data.actCount} actividades · ${d.data.pct}% avance`);
+
+  // Etiquetas de objetivo (cabeceras)
+  svg.selectAll('.obj-label').data(root.children || []).enter().append('text')
+    .attr('class', 'obj-label')
+    .attr('x', d => d.x0 + 4)
+    .attr('y', d => d.y0 + 14)
+    .attr('fill', 'white')
+    .attr('font-size', '10px')
+    .attr('font-weight', '700')
+    .attr('font-family', 'DM Sans, sans-serif')
+    .text(d => (d.data.name || '').replace('Mejorar el ','').replace('Fortalecer la Capacidad de ','').replace('Incrementar la ','').substring(0,28));
+}
+
+// ============================================
+//  GRÁFICA B — GANTT / LÍNEA DE TIEMPO (Chart.js)
+// ============================================
+let _ganttChart = null;
+function renderGantt(allActsData) {
+  const canvas = document.getElementById('chart-gantt');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (_ganttChart) { _ganttChart.destroy(); _ganttChart = null; }
+
+  const START = new Date('2024-01-01').getTime();
+  const END   = new Date('2027-12-31').getTime();
+  const today = Date.now();
+
+  const labels = [];
+  const data   = [];
+  const bgColors = [];
+
+  S.forEach(obj => {
+    const acts = allActsData.filter(x => x.o.id === obj.id);
+    const pct  = avgPct(acts.map(x => x.a.pct));
+    const label = (['Conocimiento','Reducción','Respuesta','Gobernanza'][S.indexOf(obj)] || obj.proceso || obj.id);
+    labels.push(label);
+    data.push([START, END]);
+    const col = pct <= 25 ? 'rgba(180,180,180,0.85)'
+              : pct <= 50 ? 'rgba(165,214,167,0.85)'
+              : pct <= 75 ? 'rgba(102,187,106,0.85)'
+              : 'rgba(46,125,50,0.85)';
+    bgColors.push(col);
+  });
+
+  const todayPlugin = {
+    id: 'todayLine',
+    afterDraw(chart) {
+      if (today < START || today > END) return;
+      const { ctx, chartArea, scales } = chart;
+      const x = scales.x.getPixelForValue(today);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, chartArea.top);
+      ctx.lineTo(x, chartArea.bottom);
+      ctx.strokeStyle = '#FF5722';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#FF5722';
+      ctx.font = 'bold 10px DM Sans, sans-serif';
+      ctx.fillText('Hoy', x + 4, chartArea.top + 12);
+      ctx.restore();
+    }
+  };
+
+  _ganttChart = new Chart(canvas, {
+    type: 'bar',
+    plugins: [todayPlugin],
+    data: {
+      labels,
+      datasets: [{
+        label: 'Período',
+        data,
+        backgroundColor: bgColors,
+        borderColor: bgColors.map(c => c.replace('0.85', '1')),
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label(ctx) {
+            const acts = allActsData.filter(x => x.o.id === S[ctx.dataIndex]?.id);
+            const pct = avgPct(acts.map(x => x.a.pct));
+            return ` Avance: ${pct}% · 2024–2027`;
+          }
+        }
+      }},
+      scales: {
+        x: {
+          type: 'linear',
+          min: START,
+          max: END,
+          ticks: {
+            color: 'rgba(255,255,255,0.6)',
+            font: { size: 10 },
+            callback: v => new Date(v).getFullYear()
+          },
+          grid: { color: 'rgba(255,255,255,0.07)' }
+        },
+        y: {
+          ticks: { color: 'rgba(255,255,255,0.8)', font: { size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+  canvas.parentElement.style.height = '280px';
+}
+
+// ============================================
+//  GRÁFICA C — SUNBURST (D3.js)
+// ============================================
+function renderSunburst(allActsData) {
+  const container = document.getElementById('chart-sunburst');
+  if (!container || typeof d3 === 'undefined') return;
+  container.innerHTML = '';
+
+  const W = container.clientWidth || 380;
+  const H = Math.max(300, Math.min(W, 500));
+  const radius = Math.min(W, H) / 2 - 4;
+
+  // Construir jerarquía
+  const data = {
+    name: 'Plan Metropolitano',
+    type: 'root',
+    children: S.map((obj, i) => {
+      const progs = obj.estrategias.flatMap(e => e.programas);
+      const objActs = allActsData.filter(x => x.o.id === obj.id);
+      const objAvg = avgPct(objActs.map(x => x.a.pct));
+      return {
+        name: ['Conocimiento','Reducción','Respuesta','Gobernanza'][i] || obj.proceso,
+        type: 'obj', objId: obj.id, avg: objAvg,
+        children: progs.map(prog => {
+          const projsA = prog.proyectos.filter(proyectoActivo);
+          const progActs = allActsData.filter(x => x.p.id === prog.id);
+          const progAvg = avgPct(progActs.map(x => x.a.pct));
+          const shortN = prog.title.replace(/PROG \d+[\.\d-]*\. /, '').substring(0, 28);
+          return {
+            name: shortN, type: 'prog', avg: progAvg, count: projsA.length,
+            value: projsA.length || 1
+          };
+        })
+      };
+    })
+  };
+
+  const root = d3.hierarchy(data).sum(d => d.value || 0).sort((a, b) => b.value - a.value);
+  d3.partition().size([2 * Math.PI, root.height + 1])(root);
+  root.each(d => d.current = d);
+
+  const arc = d3.arc()
+    .startAngle(d => d.x0)
+    .endAngle(d => d.x1)
+    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+    .padRadius(radius * 1.5)
+    .innerRadius(d => d.y0 * radius)
+    .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
+
+  // Colores
+  const OBJ_SB = ['#339B33','#2E7D32','#e6a817','#1B5E20'];
+  function sbColor(d) {
+    if (d.depth === 0) return '#1B5E20';
+    if (d.depth === 1) { const i = d.parent.children.indexOf(d); return OBJ_SB[i % 4]; }
+    if (d.depth === 2) { const i = d.parent.parent.children.indexOf(d.parent); return OBJ_SB[i % 4] + 'CC'; }
+    return '#A5D6A7';
+  }
+
+  // Back button div
+  const backDiv = document.createElement('div');
+  backDiv.style.cssText = 'min-height:24px;margin-bottom:4px;text-align:center';
+  const backBtn = document.createElement('button');
+  backBtn.className = 'sunburst-back-btn';
+  backBtn.innerHTML = '← Volver';
+  backBtn.style.display = 'none';
+  backDiv.appendChild(backBtn);
+  container.appendChild(backDiv);
+
+  const svg = d3.select(container).append('svg')
+    .attr('viewBox', `${-W/2} ${-H/2} ${W} ${H}`)
+    .attr('width', W).attr('height', H)
+    .style('display', 'block').style('margin', '0 auto');
+
+  const g = svg.append('g');
+
+  const path = g.append('g').selectAll('path')
+    .data(root.descendants().slice(1))
+    .join('path')
+    .attr('fill', d => sbColor(d))
+    .attr('fill-opacity', d => arcVis(d.current) ? (d.children ? 0.85 : 0.5) : 0)
+    .attr('pointer-events', d => arcVis(d.current) ? 'auto' : 'none')
+    .attr('d', d => arc(d.current))
+    .attr('stroke', '#0e1115').attr('stroke-width', 0.5);
+
+  path.filter(d => d.children)
+    .style('cursor', 'pointer')
+    .on('click', clicked);
+
+  path.append('title').text(d => {
+    const parts = d.ancestors().map(x => x.data.name).reverse().join(' › ');
+    const info = d.data.avg !== undefined ? `\n${d.data.avg}% avance` : '';
+    const cnt  = d.data.count !== undefined ? `\n${d.data.count} proyecto(s)` : '';
+    return parts + info + cnt;
+  });
+
+  const label = g.append('g').attr('pointer-events','none')
+    .attr('text-anchor','middle').style('user-select','none')
+    .selectAll('text').data(root.descendants().slice(1)).join('text')
+    .attr('dy', '0.35em')
+    .attr('fill-opacity', d => +lblVis(d.current))
+    .attr('transform', d => lblTransform(d.current))
+    .text(d => d.data.name.substring(0, 12))
+    .attr('fill', 'white').attr('font-size', '8px')
+    .attr('font-family', 'DM Sans, sans-serif');
+
+  // Círculo central — click vuelve a raíz
+  const centerCircle = svg.append('circle')
+    .datum(root)
+    .attr('r', radius * 0.3)
+    .attr('fill', '#1B5E20')
+    .attr('opacity', 0.9)
+    .attr('cursor', 'pointer')
+    .on('click', clicked);
+
+  svg.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+    .attr('fill','white').attr('font-size','9px').attr('font-family','DM Sans, sans-serif')
+    .attr('pointer-events','none').text('Plan');
+
+  let focusStack = [];
+  let _inBack = false;
+
+  function clicked(event, p) {
+    if (!p || !p.children) return;
+    if (!_inBack) focusStack.push(p);
+    backBtn.style.display = focusStack.length > 0 ? '' : 'none';
+    p.parent && centerCircle.datum(p.parent);
+
+    root.each(d => d.target = {
+      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+      y0: Math.max(0, d.y0 - p.depth),
+      y1: Math.max(0, d.y1 - p.depth)
+    });
+
+    const t = svg.transition().duration(500);
+    path.transition(t)
+      .tween('data', d => { const i = d3.interpolate(d.current, d.target); return t2 => d.current = i(t2); })
+      .attr('fill-opacity', d => arcVis(d.target) ? (d.children ? 0.85 : 0.5) : 0)
+      .attr('pointer-events', d => arcVis(d.target) ? 'auto' : 'none')
+      .attrTween('d', d => () => arc(d.current));
+    label.transition(t)
+      .attr('fill-opacity', d => +lblVis(d.target))
+      .attrTween('transform', d => () => lblTransform(d.current));
+  }
+
+  backBtn.onclick = () => {
+    focusStack.pop();
+    const prev = focusStack.length > 0 ? focusStack[focusStack.length - 1] : root;
+    if (focusStack.length === 0) backBtn.style.display = 'none';
+    _inBack = true;
+    clicked(null, prev);
+    _inBack = false;
+  };
+
+  function arcVis(d) { return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0; }
+  function lblVis(d) { return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03; }
+  function lblTransform(d) {
+    const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+    const y = (d.y0 + d.y1) / 2 * radius;
+    return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+  }
 }

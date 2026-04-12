@@ -20,11 +20,11 @@
         </div>
       </div>
       <div class="nav" id="main-nav">
-        <button class="nav-btn" data-view="landing" id="btn-inicio" style="display:none" data-short="🏠 Inicio">🏠 Inicio</button>
-        <button class="nav-btn plan-only" data-view="plan" data-short="📋 Plan">📋 El Plan</button>
-        <button class="nav-btn prog-only" data-view="dashboard" data-short="📊 Prog.">📊 Componente Programático</button>
-        <button class="nav-btn prog-only" data-view="arbol" data-short="🌳 Árbol">🌳 Árbol del plan</button>
-        <button class="nav-btn prog-only" data-view="kanban" data-short="📌 Kanban">📌 Kanban</button>
+        <button class="nav-btn" data-view="landing" id="btn-inicio" style="display:none" data-short="Inicio"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-lbl">Inicio</span></button>
+        <button class="nav-btn plan-only" data-view="plan" data-short="Plan"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg><span class="nav-lbl">El Plan</span></button>
+        <button class="nav-btn prog-only" data-view="dashboard" data-short="Dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="3" width="4" height="18"/><rect x="10" y="8" width="4" height="13"/><rect x="2" y="13" width="4" height="8"/></svg><span class="nav-lbl">Componente Programático</span></button>
+        <button class="nav-btn prog-only" data-view="arbol" data-short="Árbol"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-lbl">Árbol del plan</span></button>
+        <button class="nav-btn prog-only" data-view="kanban" data-short="Kanban"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="7" rx="1"/></svg><span class="nav-lbl">Kanban</span></button>
       </div>
     </div>
     <div class="topbar-right">
@@ -380,6 +380,33 @@
         <div id="gov-card-wrap"></div>
       </div>
 
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- ANÁLISIS VISUAL DEL PLAN — al final del dashboard      -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div class="viz-section-sep">
+        <div class="viz-sep-line"></div>
+        <div class="viz-sep-title">Análisis Visual del Plan</div>
+        <div class="viz-sep-line"></div>
+      </div>
+
+      <!-- Treemap (100% ancho) -->
+      <div class="viz-card" style="margin-bottom:20px">
+        <div class="viz-card-title">Distribución de proyectos por programa</div>
+        <div id="chart-treemap" style="min-height:300px"></div>
+      </div>
+
+      <!-- Gantt + Sunburst (50/50) -->
+      <div class="viz-row">
+        <div class="viz-card">
+          <div class="viz-card-title">Línea de tiempo del plan</div>
+          <div style="position:relative;min-height:300px"><canvas id="chart-gantt"></canvas></div>
+        </div>
+        <div class="viz-card">
+          <div class="viz-card-title">Estructura jerárquica del plan</div>
+          <div id="chart-sunburst" style="min-height:300px;position:relative"></div>
+        </div>
+      </div>
+
     </div><!-- /view-dashboard -->
 
     <!-- ARBOL -->
@@ -409,6 +436,8 @@
         </select>
       </div>
       <div class="tree-wrap" id="tree-root"></div>
+      <!-- Proyectos removidos (se renderiza dinámicamente) -->
+      <div id="proyectos-removidos-wrap" style="margin-top:24px"></div>
     </div>
 
     <!-- KANBAN -->
@@ -490,6 +519,143 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- Modal detalle de proyecto -->
+<div class="modal-overlay" id="modal-proyecto">
+  <div class="modal-box modal-proyecto-box">
+    <div class="modal-title" id="mp-title-display"></div>
+    <div id="mp-nuevo-badge" style="display:none;margin-bottom:10px"><span class="badge-nuevo">Nuevo</span></div>
+    <div class="form-field">
+      <label class="form-label">Meta / Indicador</label>
+      <input class="form-input" type="text" id="mp-meta-ind" placeholder="Indicador o meta del proyecto...">
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Fecha inicio planificada</label>
+        <input class="form-input" type="date" id="mp-fecha-inicio">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Fecha fin planificada</label>
+        <input class="form-input" type="date" id="mp-fecha-fin">
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Descripción del proyecto</label>
+      <textarea class="form-input" id="mp-descripcion" rows="3" placeholder="Descripción general..."></textarea>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Responsables</label>
+      <div id="mp-chips-container" class="chips-container"></div>
+      <div class="chip-input-row" id="mp-chip-input-row">
+        <input class="form-input chip-input" type="text" id="mp-resp-input" placeholder="Agregar responsable...">
+        <button class="btn-chip-add" id="mp-resp-add" title="Agregar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-actions" id="mp-actions-edit">
+      <button class="btn-danger-outline" id="mp-btn-remover">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="10" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/></svg>
+        Remover proyecto
+      </button>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn-secondary" id="mp-btn-cancelar">Cancelar</button>
+        <button class="btn-primary" id="mp-btn-guardar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Guardar
+        </button>
+      </div>
+    </div>
+    <div class="modal-actions" id="mp-actions-readonly" style="display:none">
+      <button class="btn-secondary" id="mp-btn-cerrar-ro">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmación remover proyecto -->
+<div class="modal-overlay" id="modal-confirmar-remover">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-title" style="color:#DC3545">Remover proyecto del plan activo</div>
+    <p id="modal-confirmar-msg" style="font-size:13px;color:var(--text2);margin:12px 0 4px;line-height:1.6"></p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:16px">Podrás restaurarlo desde la sección "Proyectos Removidos".</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="modal-confirmar-cancelar">Cancelar</button>
+      <button class="btn-danger" id="modal-confirmar-ok">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="10" y2="17"/><line x1="14" y1="12" x2="14" y2="17"/></svg>
+        Remover
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar proyecto -->
+<div class="modal-overlay" id="modal-agregar-proyecto">
+  <div class="modal-box" style="max-width:600px;max-height:90vh;overflow-y:auto">
+    <div class="modal-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Agregar proyecto al plan
+    </div>
+    <div style="margin-bottom:14px;font-size:12px;color:var(--text3)">Ubicación en la estructura del plan</div>
+    <div class="form-grid" style="margin-bottom:14px">
+      <div class="form-field">
+        <label class="form-label">Objetivo estratégico *</label>
+        <select class="form-input" id="ap-objetivo">
+          <option value="">— Seleccionar objetivo —</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Programa *</label>
+        <select class="form-input" id="ap-programa">
+          <option value="">— Primero seleccione objetivo —</option>
+        </select>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:14px;font-size:12px;color:var(--text3)">Datos del proyecto</div>
+    <div class="form-field">
+      <label class="form-label">Nombre del proyecto *</label>
+      <input class="form-input" type="text" id="ap-nombre" placeholder="Nombre descriptivo del proyecto...">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-input" id="ap-descripcion" rows="2" placeholder="Descripción general del proyecto (opcional)..."></textarea>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Meta / Indicador</label>
+      <input class="form-input" type="text" id="ap-meta-ind" placeholder="Indicador o meta del proyecto (opcional)...">
+    </div>
+    <div class="form-field">
+      <label class="form-label">Responsables</label>
+      <div id="ap-chips-container" class="chips-container"></div>
+      <div class="chip-input-row">
+        <input class="form-input chip-input" type="text" id="ap-resp-input" placeholder="Agregar responsable...">
+        <button class="btn-chip-add" id="ap-resp-add" title="Agregar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Fecha inicio planificada</label>
+        <input class="form-input" type="date" id="ap-fecha-inicio">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Fecha fin planificada</label>
+        <input class="form-input" type="date" id="ap-fecha-fin">
+      </div>
+    </div>
+    <div id="ap-error" style="display:none;background:#fff3f3;border:1px solid #dc3545;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#dc3545"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="ap-btn-cancelar">Cancelar</button>
+      <button class="btn-primary" id="ap-btn-guardar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Agregar al plan
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 </body>
