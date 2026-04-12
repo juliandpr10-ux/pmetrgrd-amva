@@ -1898,9 +1898,15 @@ function updateLandingCounter() {
 function renderTreemap(allActsData) {
   const container = document.getElementById('chart-treemap');
   if (!container || typeof d3 === 'undefined') return;
+
+  // Disconnect any previous ResizeObserver before re-rendering
+  if (renderTreemap._ro) { renderTreemap._ro.disconnect(); renderTreemap._ro = null; }
+
   container.innerHTML = '';
 
-  const W = container.clientWidth || container.offsetWidth || 800;
+  const card = container.closest('.viz-card') || container.parentElement;
+  const padding = 48; // 24px padding × 2
+  const W = Math.max((card ? card.offsetWidth - padding : 0) || container.offsetWidth || 800, 200);
   const H = window.innerWidth < 768 ? 300 : 420;
   container.style.height = H + 'px';
 
@@ -1942,7 +1948,9 @@ function renderTreemap(allActsData) {
   d3.treemap().size([W, H]).paddingInner(2).paddingOuter(3).paddingTop(22)(root);
 
   const svg = d3.select(container).append('svg')
-    .attr('width', W).attr('height', H).style('display', 'block');
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('width', '100%').attr('height', H)
+    .style('display', 'block');
 
   // Drop-shadow filter for text readability
   const defs = svg.append('defs');
@@ -2021,5 +2029,18 @@ function renderTreemap(allActsData) {
         <div style="background:#66CC33;height:100%;width:${Math.min(d.data.pct,100)}%;border-radius:3px"></div>
       </div>`;
   }).on('mouseleave', () => { tip.style.display = 'none'; });
+
+  // ResizeObserver — redraw when card width changes
+  if (typeof ResizeObserver !== 'undefined' && card) {
+    let _roTimer, _lastW = W;
+    renderTreemap._ro = new ResizeObserver(() => {
+      clearTimeout(_roTimer);
+      _roTimer = setTimeout(() => {
+        const newW = (card.offsetWidth - padding) || 0;
+        if (Math.abs(newW - _lastW) > 4) renderTreemap(allActsData);
+      }, 150);
+    });
+    renderTreemap._ro.observe(card);
+  }
 }
 
